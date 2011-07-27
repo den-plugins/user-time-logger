@@ -1,0 +1,26 @@
+<div id="time_entries_details">
+<%selected = option=='user'? option : 'project' %>
+<h4><%= l(:label_by_project_or_user_report, :option => selected) %></h4>
+
+<%= render :partial => "my/blocks/reports_date_range", :locals => {:option => option, :view => params[:view]}%>
+
+<div class="total-hours">
+    <p><%= l(:label_total_bill) %>: <%= html_hours("%.2f" % entries.sum(&:hours).to_f) %> hours</p>
+</div>
+<div style="overflow: auto;">
+<%= render :partial => "my/blocks/time_entries_details#{option}_billable", :locals => {:option => option, :entries => entries, :projects => projects, :view => params[:view]}%>
+</div>
+<br  />
+
+<div class="total-hours">
+    <p><%= l(:label_total_non_bill) %>: <%= html_hours("%.2f" % entries_non_bill.sum(&:hours).to_f) %> hours</p>
+</div>
+<div style="overflow: auto;">
+<%= render :partial => "my/blocks/time_entries_details#{option}_billable", :locals => {:option => option, :entries => entries_non_bill, :projects => projects, :view => params[:view]}%>
+</div>
+
+<p class="other-formats">
+<%= l(:label_export_to) %>
+<span><%= link_to 'CSV', params.merge({:format => 'csv'}), :class => 'csv' %></span>
+</p>
+</div>

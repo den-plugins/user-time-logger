@@ -1,0 +1,16 @@
+<h3><%=l(:label_leave_entries_report)%></h3>
+<%= link_to_remote "By Project", { :url => { :controller => 'ticker',
+                                             :action => 'update_leave_entries', :option => '' }, :method => 'get'} %> |  
+<%= link_to_remote "By User", { :url => { :controller => 'ticker',
+                                          :action => 'update_leave_entries', :option => 'user' }, :method => 'get'} %>
+<%
+c = ARCondition.new("status = 1")
+@users =  User.find(:all, :conditions => c.conditions)
+projects = Project.find(:all)
+leaves = nil
+%>
+
+<div id="leave_entries_details">
+    <%= render :partial => 'my/blocks/leave_entries_details', :locals => {:leaves => leaves, :projects => projects} %>
+</div>
+<br />

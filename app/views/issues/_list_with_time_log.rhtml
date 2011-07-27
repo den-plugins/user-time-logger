@@ -1,0 +1,76 @@
+<%
+# ---------------------------------------------------------------------------
+#  Copyright 2007,2008 CompanyNameHere
+#  All Rights Reserved.
+# 
+#  This is UNPUBLISHED PROPRIETARY SOURCE CODE of CompanyNameHere.;
+#  the contents of this file may not be disclosed to third parties, copied or
+#  duplicated in any form, in whole or in part, without the prior written
+#  permission of CompanyNameHere.
+# ---------------------------------------------------------------------------
+%>
+
+<h4><%=l(:label_assigned_to_me_issues)%></h4>
+<%= link_to_function '[Show/Hide]', "Element.toggle('assigned_issues_form')" if issues.any?%>
+<% if issues && issues.any? %>
+<% form_tag({}, {:id => 'assigned_issues_form'}) do %>
+        <input id="partial_name" type="hidden" name="partial_name" value="issuesassignedwithtimelog" />
+	<table class="list issues">		
+		<thead><tr>
+                <th><%= link_to image_tag('toggle_check.png'), {}, :onclick => 'toggleIssuesSelection(Element.up(this, "form")); return false;',
+                                                           :title => "#{l(:button_check_all)}/#{l(:button_uncheck_all)}" %>
+                </th>
+		<th>#</th>
+                <th><%=l(:label_project)%></th>
+		<th><%=l(:field_tracker)%></th>
+		<th><%=l(:field_subject)%></th>
+                <th><%=h "Time Log"%></th>
+		</tr></thead>
+		<tbody>
+                <% prev_proj = ""%>
+                <% for issue in issues %>
+                <% unless issue.closed? %>
+		<tr id="issue-<%= issue.id %>" class="issue hascontextmenu <%= cycle('odd', 'even') %> <%= "status-#{issue.status.position} priority-#{issue.priority.position}" %>">
+			<td class="checkbox"><%= check_box_tag("ids[]", issue.id, false, :id => nil) %></td>
+                        <td class="id">
+				<%= link_to issue.id, :controller => 'issues', :action => 'show', :id => issue %>
+			</td>
+                        <td>
+                        <% unless prev_proj == issue.project.name %>
+                            <em><%=h issue.project.name %></em>
+                        <% end %>
+                        <% prev_proj = issue.project.name %>
+                        </td>
+			<td><%= issue.tracker.name %><br />
+                            <%= issue.status.name %> - <%= format_time(issue.updated_on) %>
+                        </td>
+			<td class="subject"><center>
+                            <%= link_to h(truncate(issue.subject,80)), :controller => 'issues', :action => 'show', :id => issue %>
+                          </center>
+                        </td>
+                        <td class="subject">
+                           <table align="center">
+                             <tr>
+                             <td><label for="time_entries_<%=issue.id%>_hours">Hours<span class="required">*</span></label>
+                             <input type="text" size="8" name="time_entries[<%=issue.id%>][hours]" id="time_entries_<%=issue.id%>_hours"/></td>
+                             <td><label for="time_entries_<%=issue.id%>_spent_on">Spent on</label>
+                                <%= text_field_tag "time_entries_#{issue.id}_spent_on", Date.today, :name=>"time_entries[#{issue.id}][spent_on]", :size => 10%><%= calendar_for("time_entries_#{issue.id}_spent_on") %>
+                             </td>
+                             <td><label for="time_entries_<%=issue.id%>_activity_id">Activity<span class="required">*</span></label>
+                             <%= select_tag "time_entries_#{issue.id}_activity_id", options_for_select(activity_collection_for_select_options, Enumeration.activities.default.id), :name => "time_entries[#{issue.id}][activity_id]" %>
+														 <label for="time_entries<%=issue.id%>_comments">Comment</label></td>
+														 <td><%= text_area_tag "time_entries_#{issue.id}_comments", nil, :name=>"time_entries[#{issue.id}][comments]" %></td>
+                             </tr>
+                           </table>                         
+
+                        </td>			
+		</tr>
+                <% end %>
+		<% end %>
+		</tbody>
+	</table>
+<%= link_to l(:label_issue_view_all), :controller => 'issues', :action => 'index', :set_filter => 1, :assigned_to_id => 'me' %>
+<% end %>
+<% else %>
+	<p class="nodata"><%= l(:label_no_data) %></p>
+<% end %>

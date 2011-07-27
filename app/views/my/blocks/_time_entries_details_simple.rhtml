@@ -1,0 +1,93 @@
+<div id="time_entries_details">
+<% selected = case option
+              when 'user' then 'user'
+              when 'simple' then 'simple'
+              else 'project'
+              end %>
+<h4><%= l(:label_by_project_or_user_report, :option => selected) %></h4>
+
+<%= render :partial => "my/blocks/reports_date_range_simple", :locals => {:option => option, :view => params[:view]}%>
+
+<div style="overflow: auto;">
+
+  <table class="list time-entries" style="overflow: auto;">
+  
+  
+	  <thead>
+	    <tr>
+	      <th rowspan="3" >Employee Name </th>
+	      <th rowspan="3" >Position </th>
+        <th rowspan="3" >Total Hours (<%=html_hours("%.2f" % @th.to_f)%>) </th>
+        <th rowspan="3" >Total Hours on Selected Projects (<%=html_hours("%.2f" % @thos.to_f)%>) </th>
+        <th rowspan="3" >Billable Hours (<%=html_hours("%.2f" % @tbh.to_f)%>) </th>
+        <th rowspan="3" >Non-Billable Hours (<%=html_hours("%.2f" % @tnbh.to_f)%>) </th>
+        
+        <% if @for_acctg %>
+        <th rowspan="3" >Internal Rates (<%=html_hours("%.2f" % @total_internal_rates.to_f )%>) </th>
+        <th rowspan="3" >Resource Costs (<%=html_hours("%.2f" % @total_computed_internal_rates.to_f)%>) </th>
+        <th rowspan="3" >SOW Rates (<%=html_hours("%.2f" % @total_sow_rates.to_f)%>) </th>
+        <th rowspan="3" >Computed SOW Rates (<%=html_hours("%.2f" % @total_computed_sow_rates.to_f)%>) </th>
+        <% end %>
+        <%=header %>
+      </tr>
+	  </thead>
+	  
+	  
+	  <tbody>
+	      <% @summary.each do |summary| %>
+        <!--This row is per resource in a project and the total hours spent by the resource in a day -->
+        <tr class="time-entry" style="border-bottom: 1px solid rgb(245, 245, 245);">
+          <td class="subject"> 
+            <% ps = (params[:selectedprojects].blank?)? "" : params[:selectedprojects].join(",") %>
+            <%=link_to summary[:name], "/ticker/user_timelogs?user_id=#{summary[:user_id]}&from=#{@from}&to=#{@to}&type=#{@columns}", :target => "_blank" %> 
+          </td>
+          <td> <%=summary[:job_title] %> </td>
+          <td>               
+            <%=link_to html_hours("%.2f" % summary[:total_hours].to_f), "/ticker/user_timelogs?projects=#{ps}&user_id=#{summary[:user_id]}&from=#{@from}&to=#{@to}&type=#{@columns}", :target => "_blank" %> 
+           </td>
+          <td> <%=link_to html_hours("%.2f" % summary[:total_hours_on_selected].to_f), "/ticker/user_timelogs?projects=#{ps}&user_id=#{summary[:user_id]}&from=#{@from}&to=#{@to}&type=#{@columns}", :target => "_blank" %>  </td>
+          <td> <%=link_to html_hours("%.2f" % summary[:billable_hours].to_f), "/ticker/user_timelogs?projects=#{ps}&user_id=#{summary[:user_id]}&from=#{@from}&to=#{@to}&type=#{@columns}", :target => "_blank" %>  </td>
+          <td> <%=link_to html_hours("%.2f" % summary[:non_billable_hours].to_f), "/ticker/user_timelogs?projects=#{ps}&user_id=#{summary[:user_id]}&from=#{@from}&to=#{@to}&type=#{@columns}", :target => "_blank" %>  </td>
+          <% if @for_acctg %>
+          <td> <%= summary[:internal_rate] %> </td>
+          <td> <%= summary[:computed_internal_rate] %></td>
+          <td> <%= summary[:sow_rate] %></td>
+          <td> <%= summary[:computed_sow_rate] %></td>
+          <% end %>
+          
+          <%=print_entries(summary[:entries]) %>
+          
+        </tr>
+        <% end %>
+        
+        <tr class="time-entry" style="border-bottom: 1px solid rgb(245, 245, 245);">
+          <td class="subject"></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <% if @for_acctg %>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <% end %>
+          <% for tall in @tall %>
+          <td><strong><%=(tall > 0)? html_hours("%.2f" % tall.to_f) : " - " %></strong></td>
+          <% end %>
+        </tr>
+        
+    </tbody>
+  </table>
+</div>
+<br  />
+
+<p class="other-formats">
+<%= l(:label_export_to) %>
+<span><%= link_to 'CSV', params.merge({:format => 'csv'}), :class => 'csv' %></span>
+<br/>
+<span><%=link_to 'CSV for all engineers', params.merge({:format => 'csv', "eng_only_csv" => "true"}), :class => 'csv' %></span>
+</p>
+
+</div>

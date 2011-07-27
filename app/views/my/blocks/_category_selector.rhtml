@@ -1,0 +1,13 @@
+<br /><br />
+<% project_categories = ['Exist Services Activities','Project Generic Tasks']
+ %>
+<select id="category_select" onchange="
+	new Ajax.Request(this.value, {asynchronous: true, evalScripts: true});">
+<option selected="selected" disabled="disabled"><%= l(:text_select_recurring_issue_category) %></option>
+<option disabled="disabled">----------------------------------------</option>
+<% project_categories.sort.each do |category| %>
+    <%= content_tag('option', h(category.capitalize), :value => url_for(:controller => 'ticker', 
+                                                                        :action => 'update_recurring_issues',
+                                                                        :category => category)) %>
+<% end %>
+</select>

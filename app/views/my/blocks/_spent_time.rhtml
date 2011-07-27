@@ -1,0 +1,53 @@
+<h4><%=l(:label_summary)%> (<%= l(:label_last_n_days, 7) %>)</h4>
+<% 
+entries = TimeEntry.find(:all,
+				:conditions => ["#{TimeEntry.table_name}.user_id = ? AND #{TimeEntry.table_name}.spent_on BETWEEN ? AND ?", @user.id, Date.today - 7, Date.today],
+				:include => [:activity, :project, {:issue => [:tracker, :status]}],
+				:order => "#{TimeEntry.table_name}.updated_on DESC, #{Project.table_name}.name ASC, #{Tracker.table_name}.position ASC, #{Issue.table_name}.id ASC")
+entries_by_day = entries.group_by(&:spent_on)
+%>
+
+<% if entries.any? %>
+<table class="list time-entries">
+<thead>
+<th><%= l(:label_activity) %></th>
+<th><%= l(:label_project) %></th>
+<th><%= l(:field_comments) %></th>
+<th><%= l(:field_hours) %></th>
+<th></th>
+</thead>
+<tbody>
+<% entries_by_day.keys.sort.reverse.each do |day| %>
+    <tr class="odd">
+    <td><strong><%= day == Date.today ? l(:label_today).titleize : format_date(day) %></strong></td>
+    <td colspan="2"></td>
+    <td class="hours"><center><em><%= html_hours("%.2f" % entries_by_day[day].sum(&:hours).to_f) %></em></center></td>
+    <td></td>
+    </tr>
+    <% entries_by_day[day].each do |entry| -%>
+    
+    <tr class="time-entry" style="border-bottom: 1px solid #f5f5f5;">
+    <td class="activity"><%=h entry.activity %></td>
+    <td class="subject"><center><%=h entry.project %> <%= ' - ' + link_to_issue(entry.issue, :title => h("#{entry.issue.subject} (#{entry.issue.status})")) if entry.issue %></center></td>
+    <td class="comments"><center><%= textilizable entry.comments %></center></td>
+    <td class="hours"><center><%= html_hours("%.2f" % entry.hours) %></center></td>
+    <td align="center">
+    <% if entry.editable_by?(@user) -%>
+        <%= link_to image_tag('edit.png'), {:controller => 'timelog', :action => 'edit', :id => entry},
+                                           :title => l(:button_edit) %>
+        <%= link_to image_tag('delete.png'), {:controller => 'timelog', :action => 'destroy', :id => entry},
+                                             :confirm => l(:text_are_you_sure),
+                                             :method => :post,
+                                             :title => l(:button_delete) %>
+    <% end -%>
+    </td>
+    </tr>
+    <% end -%>
+<% end -%>
+</tbody>
+</table>
+<% end %>
+<%= link_to 'View all time logs', :controller => 'ticker', :action => 'my_timelogs' %>
+<div class="total-hours">
+    <p><%= l(:label_total) %>: <%= html_hours("%.2f" % entries.sum(&:hours).to_f) %> hours</p>
+</div>

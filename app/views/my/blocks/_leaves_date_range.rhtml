@@ -1,0 +1,21 @@
+<% form_remote_tag( :url => {:controller => 'ticker', :action => 'update_leave_entries', :option => option }, :method => :get ) do %>
+<fieldset id="filters"><legend><%= l(:label_date_range) %></legend>
+    <%#= hidden_field_tag 'user', @user.id %>
+    <p>
+    <%= radio_button_tag 'leave_period_type', '1', !@free_period %>
+    <%= select_tag 'leave_period', options_for_date_range_select(params[:leave_period]),
+                             :onchange => 'this.form.onsubmit();',
+                             :onfocus => '$("leave_period_type_1").checked = true;' %>
+    </p>
+    <p>
+    <%= radio_button_tag 'leave_period_type', '2', @free_period %>
+    <span onclick="$('leave_period_type_2').checked = true;">
+    <%= l(:label_date_from) %>
+    <%= text_field_tag 'leaves_from', @from, :size => 10 %> <%= calendar_for('leaves_from') %>
+    <%= l(:label_date_to) %>
+    <%= text_field_tag 'leaves_to', @to, :size => 10 %> <%= calendar_for('leaves_to') %>
+    </span>
+    <%= submit_tag l(:button_apply), :name => nil %>
+    </p>
+</fieldset>
+<% end %>

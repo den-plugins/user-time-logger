@@ -1,0 +1,87 @@
+﻿<% if !entries.nil? && entries.any? %>
+<%projects.each do |project|%>
+	<div class="total-hours">
+		<% total_hours = entries.inject(0) do |sum,entry| 
+			if entry.project.name == project.name
+				sum + entry.hours 
+			else
+				sum + 0
+			end
+		end %>
+		<p><%= project.name.capitalize + " : " + html_hours("%.2f" % total_hours.to_f)%> hours</p>
+	</div>
+	<table class="list time-entries">
+	<thead>
+	<th><%= l(:label_employee_name) %></th>
+  <th><%= l(:label_issue) %></th>
+  <th><%= l(:label_activity) %></th>
+  <th><%= l(:field_comments) %></th>
+	<% entries_by_day = entries.group_by(&:spent_on) %>
+	<% entries_by_day.keys.sort.reverse.each do |day| %>
+		<th class="period"><%= day == Date.today ? l(:label_today).titleize : format_date(day) %></th>
+	<% end%>
+	<th></th>
+	</thead>
+	<tbody>
+		<!--This is the first row total number of hours per day -->
+    <tr>
+      <td class="subject"><center><strong><%= l(:label_total)%></strong></center></td>
+			<td colspan="3"></td>
+      <% entries_by_day.keys.sort.reverse.each do |day| %>
+				<% day_total = entries_by_day[day].inject(0)  do |sum, entry| 
+					if entry.project == project
+						sum + entry.hours 
+					else
+						sum + 0
+					end
+				end %>
+				<td class="total"><center><em><%=  html_hours("%.2f" % day_total.to_f)%></em></center></td>
+			<%end %>
+		</tr>
+	  <% project.users.each do |user| %>
+      <!--This row is per resource in a project and the total hours spent by the resource in a day -->
+      <tr class="time-entry" style="border-bottom: 1px solid #f5f5f5;">
+        <td class="subject"><center><%=h user.name%></center></td>
+        <td colspan="3"></td>
+        <% entries_by_day.keys.sort.reverse.each do |day| %>
+          <% user_sum = entries_by_day[day].inject(0) do |sum, entry| 
+            if (entry.user.name == user.name && entry.project == project)
+              sum + entry.hours 
+            else
+              sum + 0
+            end
+          end%>
+          <td class="total"><center><em><%=  user_sum.to_f != 0 ? html_hours("%.2f" % user_sum.to_f) : "--" %></em></center></td>
+        <% end %>
+      </tr>
+      <!--This is the detailed row with comments and activity -->
+      <% entries_by_day.keys.sort.reverse.each do |day| %>
+        <% entries_by_day[day].each do |entry| %>
+          <%if (entry.user.name == user.name && entry.project == project) %>
+            <tr class="time-entry" style="border-bottom: 1px solid #f5f5f5;">
+              <td colspan="1"></td>
+              <td class="subject"><center><%= link_to_issue(entry.issue, :title => h("#{entry.issue.subject} (#{entry.issue.status})")) if entry.issue %></center></td>
+              <td class="activity"><%=h entry.activity %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+              <td class="comments"><center><%= textilizable entry.comments %></center></td>
+              <%entries_by_day.keys.sort.reverse.each do |period|%>
+                <%if period.eql?(day)%>
+                  <td class="hours"><center><%=  entry.hours.to_f != 0 ? html_hours("%.2f" % entry.hours.to_f) : "--" %></center></td>
+                <%else%>
+                  <td><center>--</center></td>
+                <%end%>
+              <%end%>
+            </tr>
+           <%end%>
+        <% end %>
+      <% end %>
+	  <% end %>
+	  
+
+	</tbody>
+	</table>
+	
+<% end %>
+
+<% else %>
+		<p class="nodata"><%= l(:label_no_data) %></p>
+<% end %>

@@ -1,0 +1,16 @@
+<h3>My Time Logs</h3>
+
+<h3>Total Hours: <%= html_hours("%.2f" % @total_hours.to_f) %></h3>
+<%= render :partial => '/timelog/list', :locals => { :entries => @entries } %>
+<p class="pagination"><%= pagination_links_full @entry_pages, @entry_count %></p>
+
+<p class="other-formats">
+<%= l(:label_export_to) %>
+<span><%= link_to 'Atom', {:issue_id => @issue, :format => 'atom', :key => User.current.rss_key}, :class => 'feed' %></span>
+</p>
+
+<% html_title l('My Time Logs') %>
+
+<% content_for :header_tags do %>
+    <%= auto_discovery_link_tag(:atom, {:issue_id => @issue, :format => 'atom', :key => User.current.rss_key}, :title => l('My Time Logs')) %>
+<% end %>

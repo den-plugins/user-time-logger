@@ -1,0 +1,44 @@
+<% if !entries.nil? && entries.any? %>
+<table class="list time-entries">
+  <thead>
+    <th><%= l(:label_employee_name) %></th>
+    <th><%= l(:label_project) %> / <%= l(:label_issue) %></th>
+    <th><%= l(:label_activity) %></th>
+    <th><%= l(:field_comments) %></th>
+    <% entries_by_day = entries.group_by(&:spent_on) %>
+    <% entries_by_day.keys.sort.reverse.each do |day| %>
+      <th class="period"><%= day == Date.today ? l(:label_today).titleize : format_date(day) %></th>
+    <% end%>
+    <th></th>
+   </thead>
+  <tbody>
+<% entries_by_day.keys.sort.reverse.each do |day| %>
+    <tr>
+    <%col = 3%>
+    <% entries_by_day.keys.sort.reverse.each do |period|%>
+      <%if period.eql?(day) %>
+      <td class="subject"><center><strong><%= l(:label_total)%></strong></center></td>
+      <td colspan="<%=col%>"></td>
+      <td class="total"><center><em><%=  html_hours("%.2f" % entries_by_day[day].sum(&:hours).to_f)%></em></center></td>
+      <%else%>
+        <%col += 1%>
+      <% end %>
+    <% end %>
+    </tr>
+    <% entries_by_day[day].each do |entry| -%>
+    <tr class="time-entry" style="border-bottom: 1px solid #f5f5f5;">
+    <td class="subject"><center><%=h entry.user.name%></center></td>
+    <td class="subject"><center><strong><%=h entry.project %></strong> <%= ' - ' + link_to_issue(entry.issue, :title => h("#{entry.issue.subject} (#{entry.issue.status})")) if entry.issue %></center></td>
+    <td class="activity"><%=h entry.activity %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+    <td class="comments"><center><%= textilizable entry.comments %></center></td>
+    <% entries_by_day.keys.sort.reverse.each do |period|%>
+        <td class="hours"><center><%=html_hours("%.2f" % entry.hours) if period.eql?(day)%> </center></td>
+    <% end %>
+    </tr>
+    <% end -%>
+<% end -%>
+</tbody>
+</table>
+<% else %>
+    <p class="nodata"><%= l(:label_no_data) %></p>
+<% end %>

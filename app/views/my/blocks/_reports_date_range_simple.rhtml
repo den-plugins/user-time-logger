@@ -1,0 +1,150 @@
+<% form_remote_tag( :url => {:controller => 'ticker', :action => 'update_time_entries_simple', :option => option}, :method => :get, :html => {:id => "myform"} ) do %>
+<fieldset id="filters">
+    <legend>
+      <%= l(:label_filter_plural) %> 
+      <%=link_to "(hide/show)", "", :onclick => "$('filter_content').toggle(); return false;" %> 
+    </legend>
+    
+    <div style="margin:5px;" id="filter_content">
+      <div style="margin:5px;">
+      
+      <div style="vertical-align:top; float:left; margin: 0px; padding: 0px; width:190px;">
+      <%= check_box_tag :eng_only, 1, @eng_only, :onClick => "selectAllOptions( document.getElementById('selectedprojects[]') );selectAllOptions( document.getElementById('selectednames[]') );this.form.onsubmit();" %> 
+      Engineering only
+      </div>
+      <div style="vertical-align:top; float:left; margin: 0px; padding: 0px; width:190px;">
+      <%= check_box_tag :for_acctg, 1, @for_acctg, :onClick => "selectAllOptions( document.getElementById('selectedprojects[]') );selectAllOptions( document.getElementById('selectednames[]') );this.form.onsubmit();" %> 
+      For Accounting
+      </div>
+      <div style="clear:both;"></div><br/>
+      
+      <div style="vertical-align:top; float:left; margin: 0px; padding: 0px; width:80px;">
+        <%=radio_button_tag 'query', 'project', (@query == "project")? true : false, :onClick => "toggleSelections();this.form.onsubmit();"  %> 
+        <%= l(:label_project_plural)%>
+      </div>
+      <div style="vertical-align:top; float:left; margin: 0px; padding: 0px; width:300px;">
+      Available Projects
+      <%= select_tag 'availableprojects', options_from_collection_for_select(@available_projects, "id", "name"  ), 
+                                      :multiple => true, 
+                                      :size => 10,
+                                      "onDblClick" => "moveSelectedOptions($('availableprojects'),$('selectedprojects[]'),true,'')",
+                                      :style => "width:270px;",
+                                      :name => "availableprojects",
+                                      :class => "project" %>
+      <div style="float:right; margin-right:30px;">
+      Accounting Type: 
+      <%= select_tag 'acctype', options_for_select(@acctype_options, @selected_acctype),
+                                    :disabled => @disable_acctype_options,
+                                    :onchange => "selectAllOptions( document.getElementById('selectedprojects[]') );selectAllOptions( document.getElementById('selectednames[]') ); this.form.onsubmit();" %>
+      </div>
+      </div>
+      <div style="vertical-align:top; float:left; margin: 0px; padding: 0px; width:100px; align:center;">
+        <br/>
+        <input type="button" name="right" value="&gt;&gt;" onclick="moveSelectedOptions($('availableprojects'),$('selectedprojects[]'),true,'');selectAllOptions($('selectedprojects[]'));this.form.onsubmit();" class="project">
+        <br/><br/>
+        <input type="button" name="right" value="ALL &gt;&gt;" onclick="moveAllOptions($('availableprojects'),$('selectedprojects[]'),true,'');selectAllOptions($('selectedprojects[]'));this.form.onsubmit();" class="project">
+        <br/><br/>
+        <input type="button" name="left" id="leftproject" value="&lt;&lt;" onclick="moveSelectedOptions($('selectedprojects[]'),$('availableprojects'),true,'');selectAllOptions($('selectedprojects[]'));this.form.onsubmit();" class="project">
+        <br/><br/>
+        <input type="button" name="left" value="ALL &lt;&lt;" onclick="moveAllOptions($('selectedprojects[]'),$('availableprojects'),true,'');selectAllOptions($('selectedprojects[]'));this.form.onsubmit();" class="project">
+		  </div>
+		  <div style="vertical-align:top; float:left; margin: 0px; padding: 0px; width:300px;">
+		  Selected projects
+		    <%= select_tag 'selectedprojects[]', options_from_collection_for_select(@selected_projects, "id", "name"  ), 
+                                      :multiple => true, 
+                                      :size => 10,
+                                      "onDblClick" => "moveSelectedOptions($('selectedprojects[]'),$('availableprojects'],true,'')",
+                                      :onblur => "if((event.explicitOriginalTarget.id||document.activeElement.id) != 'leftproject'){selectAllOptions($('selectedprojects[]'))}",
+                                      :style => "width:270px;",
+                                      :name => "selectedprojects[]",
+                                      :id => "selectedprojects[]",
+                                      :class => "project" %>
+		  </div>
+    </div>
+    
+    <div style="clear:both;"></div><br/>
+    
+      <div style="vertical-align:top; float:left; margin: 0px; padding: 0px; width:80px;">
+      <%=radio_button_tag 'query', 'user', (@query == "user")? true : false, :onClick => "toggleSelections();this.form.onsubmit();" %> 
+      <%= l(:field_name)%>
+      </div>
+      <div style="vertical-align:top; float:left; margin: 0px; padding: 0px; width:300px;">
+      Available Names 
+      <%= select_tag 'availablenames', options_from_collection_for_select(@available_users, "id", "name"  ), 
+                                      :multiple => true, 
+                                      :size => 10,
+                                      "onDblClick" => "moveSelectedOptions($('availablenames'],$('selectednames'],true,'')",
+                                      :style => "width:270px;",
+                                      :id => "availablenames",
+                                      :class => "user" %>
+      </div>
+      <div style="vertical-align:top; float:left; margin: 0px; padding: 0px; width:100px; align:center;">
+        <br/>
+        <input type="button" name="right" value="&gt;&gt;" onclick="moveSelectedOptions($('availablenames'),$('selectednames[]'),true,'');selectAllOptions($('selectednames[]'));this.form.onsubmit();" class="user">
+        <br/><br/>
+        <input type="button" name="right" value="ALL &gt;&gt;" onclick="moveAllOptions($('availablenames'),$('selectednames[]'),true,'');selectAllOptions($('selectednames[]'));this.form.onsubmit();" class="user">
+        <br/><br/>
+        <input type="button" name="left" id="leftname" value="&lt;&lt;" onclick="moveSelectedOptions($('selectednames[]'),$('availablenames'),true,'');selectAllOptions($('selectednames[]'));this.form.onsubmit();" class="user">
+        <br/><br/>
+        <input type="button" name="left" value="ALL &lt;&lt;" onclick="moveAllOptions($('selectednames[]'),$('availablenames'),true,'');selectAllOptions($('selectednames[]'));this.form.onsubmit();" class="user">
+		  </div>
+		  
+		  <div style="vertical-align:top; float:left; margin: 0px; padding: 0px; width:300px;">
+		  Selected Names
+		    <%= select_tag 'selectednames[]', options_from_collection_for_select(@selected_users, "id", "name"  ), 
+                                      :multiple => true, 
+                                      :size => 10,
+                                      "onDblClick" => "moveSelectedOptions($('selectednames[]'),$('availablenames'),true,'')",
+                                      :onblur => "if((event.explicitOriginalTarget.id||document.activeElement.id) != 'leftname'){selectAllOptions($('selectednames[]'))}",
+                                      :style => "width:270px;",
+                                      :name => "selectednames[]",
+                                      :id => "selectednames[]",
+                                      :class => "user" %>
+		  </div>
+		
+   
+    <div style="clear:both;"></div><br/>
+    
+    
+    
+    
+    
+    <div style="margin:5px;">
+    <%= radio_button_tag 'period_type', '1', !@free_period %>
+    <%= select_tag 'period', options_for_date_range_select(params[:period]),
+                             :onchange => "selectAllOptions( document.getElementById('selectedprojects[]') );selectAllOptions( document.getElementById('selectednames[]') );this.form.onsubmit();",
+                             :onfocus => '$("period_type_1").checked = true;' %>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <%= radio_button_tag 'period_type', '2', @free_period %>
+    <span onclick="$('period_type_2').checked = true;">
+    <%= l(:label_date_from) %>
+    <%= text_field_tag 'from', @from, :size => 10 %> <%= calendar_for('from') %>
+    <%= l(:label_date_to) %>
+    <%= text_field_tag 'to', @to, :size => 10 %> <%= calendar_for('to') %>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <%= l(:label_details) %>: <%= select_tag 'columns', options_for_select([[l(:label_year), 'year'],
+                                                                            [l(:label_month), 'month'],
+                                                                            [l(:label_week), 'week']], @columns),
+                                                        :onchange => "selectAllOptions( document.getElementById('selectedprojects[]') );selectAllOptions( document.getElementById('selectednames[]') );this.form.onsubmit();" %>
+    <%= select_tag 'show_only', options_for_select([["Both", 'both'],
+                                                  ["Billable", 'billable'],
+                                                  ["Non-Billable", 'non_billable']], @show_only),
+                              :onchange => "selectAllOptions( document.getElementById('selectedprojects[]') );selectAllOptions( document.getElementById('selectednames[]') );this.form.onsubmit();" %>
+    </span>
+    </div>
+    <div style="clear:both"></div>
+    
+    
+    <p>
+    <%= submit_tag l(:button_apply), :name => nil, :onclick => "selectAllOptions( document.getElementById('selectedprojects[]') );selectAllOptions( document.getElementById('selectednames[]') );" %>
+    </p> 
+    
+    </div>
+</fieldset>
+<% end %>
+<script type="text/javascript">
+
+toggleQuery();
+</script>
+
+

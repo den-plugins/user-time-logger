@@ -1,0 +1,77 @@
+<div id="leave_entries_details">
+<h4><%= l(:label_by_project_report) %></h4>
+
+<%= render :partial => 'my/blocks/leaves_date_range', :locals => {:option => ''}%>
+<% if !leaves.nil? && leaves.any? && !projects.nil? && projects.any? %>
+
+<div class="total-hours">
+    <%total = TimeEntry.total_leaves(leaves)%>
+    <p><%= l(:label_total) %>: <%= html_hours("%.2f" % (total*8).to_f) %> hours or <%=pluralize(total,"day")%> </p>
+</div>
+<div style="overflow: auto;">
+<table class="list time-entries">
+<thead>
+<th><%= l(:label_project) %></th>
+<th><%= l(:label_employee_name) %></th>
+<th><%= l(:label_leave_type) %></th>
+<th><%= l(:label_details) %></th>
+<% entries_by_day = leaves.group_by(&:spent_on) %>
+<% entries_by_day.keys.sort.reverse.each do |day| %>
+    <th class="period"><%= day == Date.today ? l(:label_today).titleize : format_date(day) %></th>
+<% end %>
+</thead>
+<tbody>
+<% entries_by_day.keys.sort.reverse.each do |day| %>
+    <!--
+    <tr>
+    <%col = 3%>
+    <% entries_by_day.keys.sort.reverse.each do |period|%>
+      <%if period.eql?(day) %>
+      <td class="subject"><center><strong><%= l(:label_total)%></strong></center></td>
+      <td colspan="<%=col%>"></td>
+      <td class="total"><center><em><%=pluralize(TimeEntry.total_leaves(entries_by_day[period]),"day") if period.eql?(day) %></em></center></td>
+      <%else%>
+        <%col += 1%>
+      <% end %>
+    <% end %>
+    </tr>
+    -->
+    <%proj = ''%>
+    <%for project in projects%>
+    <% entries_by_day[day].each do |entry| -%>
+    <%if entry.user.member_of?(project) %>
+    <%unless proj.eql?(project) %>
+    <tr class="odd">
+    <td class="subject"><center><strong>
+        <%=project.name %>
+    </strong></center></td>
+    <% end%>
+    <%proj = project%>
+    <td colspan="<%=5+leaves.length%>"></td>
+    </tr>
+    <tr class="time-entry" style="border-bottom: 1px solid #f5f5f5;">
+    <td></td>
+    <td class="subject"><center><%=entry.user.name %></center></td>
+    <td class="subject"><center><%=entry.leave_type %></center></td>
+    <td class="comments"><center><%=entry.details %></center></td>
+    <% entries_by_day.keys.sort.reverse.each do |period|%>
+        <td class="hours"><center><%=pluralize(TimeEntry.leave_period(entry),"day") if period.eql?(day)%> </center></td>
+    <% end %>
+    </tr>
+    <% end -%>
+    <% end %>
+<% end -%>
+<% end -%>
+</tbody>
+</table>
+</div>
+<p class="pagination"><%#= pagination_links_entries @leaves_pages, @leaves_count, :container_id  => "leave_entries_details" %></p>
+
+<p class="other-formats">
+<%= l(:label_export_to) %>
+<span><%= link_to 'CSV', params.merge({:format => 'csv'}), :class => 'csv' %></span>
+</p>
+<% else %>
+<p class="nodata"><%= l(:label_no_data) %></p>
+<% end %>
+</div>

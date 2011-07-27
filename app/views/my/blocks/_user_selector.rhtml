@@ -1,0 +1,9 @@
+<label><%= l(:field_user) %></label>
+<select id="category_select" name="user" onchange="this.form.onsubmit();">
+<option selected="selected" disabled="disabled"><%= l("Select a user") %></option>
+<option disabled="disabled">-------------------------</option>
+<% users.sort.each do |user| %>
+      <%= content_tag('option', h(user.name), :value => user.id) %>
+<% end %>
+</select>
+<br />

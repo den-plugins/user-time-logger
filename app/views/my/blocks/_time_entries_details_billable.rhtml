@@ -1,0 +1,8 @@
+<%if view == "Normal" %>
+  <%= render :partial => 'my/blocks/time_entries_details_billable_normal', 
+    :locals => {:option => option, :entries => entries, :projects => projects}%>
+<%else%>  
+  <%= render :partial => 'my/blocks/time_entries_details_billable_detailed', 
+    :locals => {:option => option, :entries => entries, :projects => projects}%>
+<%end%>
+

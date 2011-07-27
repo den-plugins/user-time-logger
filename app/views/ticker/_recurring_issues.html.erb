@@ -1,0 +1,63 @@
+<%
+# ---------------------------------------------------------------------------
+#  Copyright 2007,2008 CompanyNameHere
+#  All Rights Reserved.
+#
+#  This is UNPUBLISHED PROPRIETARY SOURCE CODE of CompanyNameHere.;
+#  the contents of this file may not be disclosed to third parties, copied or
+#  duplicated in any form, in whole or in part, without the prior written
+#  permission of CompanyNameHere.
+# ---------------------------------------------------------------------------
+%>
+<%if @issues and @issues.any?%>
+  <h2><%=l('Recurring Issues')%></h2>
+  <% html_title(l('Recurring Issues')) %>
+  <table class="list issues">
+    <thead><tr>
+        <th><%= link_to image_tag('toggle_check.png'), {}, :onclick => 'toggleIssuesSelection(Element.up(this, "form")); return false;',
+            :title => "#{l(:button_check_all)}/#{l(:button_uncheck_all)}" %>
+        </th>
+        <th>#</th>
+        <th><%=l(:label_project)%></th>
+          <th><%=l(:label_issue_category)%></th>
+            <th><%=l(:field_tracker)%></th>
+              <th><%=l(:field_subject)%></th>
+            </tr></thead>
+            <tbody>
+              <% proj = ''%>
+              <% category = '' %>
+                          <%for issue in @issues%>
+                                            <% unless issue.closed? %>
+                  <tr id="issue-<%= issue.id %>" class="issue hascontextmenu <%= cycle('odd', 'even') %> <%= "status-#{issue.status.position} priority-#{issue.priority.position}" %>">
+                    <td class="checkbox"><%= check_box_tag("ids[]", issue.id, false, :id => nil) %></td>
+                    <td class="id">
+                      <%= link_to issue.id, :controller => 'issues', :action => 'show', :id => issue %>
+                    </td>
+                    <td>
+                      <%unless proj == issue.project.name %>
+                        <em><%=h issue.project.name %></em>
+                        <%proj = issue.project.name %>
+              <%end%>
+                    </td>
+                    <td>
+                      <%unless category == issue.category%>
+                        <em><%=h issue.category %></em>
+                        <%category = issue.category%>
+              <%end%>
+                    </td>
+                    <td><%= issue.tracker.name %><br />
+                      <%= issue.status.name %> - <%= format_time(issue.updated_on) %>
+                    </td>
+                    <td class="subject"><center>
+                        <%= link_to h(truncate(issue.subject,80)), :controller => 'issues', :action => 'show', :id => issue %>
+                      </center>
+                    </td>
+                  </tr>
+                <% end %>
+              <%end%>
+            </tbody>
+          </table>
+          <p class="pagination"><%= pagination_links_full @issue_pages, @issue_count %></p>
+        <% else %>
+          <p class="nodata"><%= l(:label_no_data) %></p>
+        <% end %>
