@@ -57,7 +57,7 @@
                                 <%= text_field_tag "time_entries_#{issue.id}_spent_on", Date.today, :name=>"time_entries[#{issue.id}][spent_on]", :size => 10%><%= calendar_for("time_entries_#{issue.id}_spent_on") %>
                              </td>
                              <td><label for="time_entries_<%=issue.id%>_activity_id">Activity<span class="required">*</span></label>
-                             <%= select_tag "time_entries_#{issue.id}_activity_id", options_for_select(activity_collection_for_select_options, Enumeration.activities.default.id), :name => "time_entries[#{issue.id}][activity_id]" %>
+                             <%= select_tag "time_entries_#{issue.id}_activity_id", options_for_select(activity_collection_for_select_options, Enumeration.activities.default), :name => "time_entries[#{issue.id}][activity_id]" %>
 														 <label for="time_entries<%=issue.id%>_comments">Comment</label></td>
 														 <td><%= text_area_tag "time_entries_#{issue.id}_comments", nil, :name=>"time_entries[#{issue.id}][comments]" %></td>
                              </tr>
