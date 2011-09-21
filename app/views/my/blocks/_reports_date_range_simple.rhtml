@@ -24,7 +24,7 @@
       </div>
       <div style="vertical-align:top; float:left; margin: 0px; padding: 0px; width:300px;">
       Available Projects
-      <%= select_tag 'availableprojects', options_from_collection_for_select(@available_projects, "id", "name"  ), 
+      <%= select_tag 'availableprojects', options_from_collection_for_select(available_projects, "id", "name"  ), 
                                       :multiple => true, 
                                       :size => 10,
                                       "onDblClick" => "moveSelectedOptions($('availableprojects'),$('selectedprojects[]'),true,'')",
@@ -33,7 +33,7 @@
                                       :class => "project" %>
       <div style="float:right; margin-right:30px;">
       Accounting Type: 
-      <%= select_tag 'acctype', options_for_select(@acctype_options, @selected_acctype),
+      <%= select_tag 'acctype', options_for_select(acctype_options, selected_acctype),
                                     :disabled => @disable_acctype_options,
                                     :onchange => "selectAllOptions( document.getElementById('selectedprojects[]') );selectAllOptions( document.getElementById('selectednames[]') ); this.form.onsubmit();" %>
       </div>
@@ -70,7 +70,7 @@
       </div>
       <div style="vertical-align:top; float:left; margin: 0px; padding: 0px; width:300px;">
       Available Names 
-      <%= select_tag 'availablenames', options_from_collection_for_select(@available_users, "id", "name"  ), 
+      <%= select_tag 'availablenames', options_from_collection_for_select(available_users, "id", "name"  ), 
                                       :multiple => true, 
                                       :size => 10,
                                       "onDblClick" => "moveSelectedOptions($('availablenames'],$('selectednames'],true,'')",

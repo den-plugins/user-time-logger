@@ -1,15 +1,14 @@
 <%= javascript_include_tag 'selectbox' -%>
-
 <h3><%=l(:label_time_entries_report)%></h3>
-<%= link_to_remote "By Project", { :url => { :controller => 'ticker',
-                                             :action => 'update_time_entries', :option => '' }, :method => 'get'} %> |  
-<%= link_to_remote "By User", { :url => { :controller => 'ticker',
-                                          :action => 'update_time_entries', :option => 'user' }, :method => 'get'} %> |
+<%#= link_to_remote "By Project", { :url => { :controller => 'ticker',
+                                             :action => 'update_time_entries', :option => '' }, :method => 'get'} %> 
+<%#= link_to_remote "By User", { :url => { :controller => 'ticker',
+                                          :action => 'update_time_entries', :option => 'user' }, :method => 'get'} %> 
 <%= link_to_remote "By User (Simple)", { :url => { :controller => 'ticker',
                                           :action => 'update_time_entries_simple', :option => 'simple' }, :method => 'get'} %>
 <% entries  = [] 
    projects = [] %>
 
 <div id="time_entries_details">
-    <%= render :partial => 'my/blocks/time_entries_details', :locals => {:entries => entries, :entries_non_bill => entries, :projects => projects, :option => ''} %>
+    <%= render :partial => 'my/blocks/time_entries_details_simple', :locals => {:entries => entries, :entries_non_bill => entries, :projects => projects, :option => 'simple'} %>
 </div>
