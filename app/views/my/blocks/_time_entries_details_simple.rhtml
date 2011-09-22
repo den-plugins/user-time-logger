@@ -11,7 +11,7 @@
 				:option => option, 
 				:view => params[:view], 
 				:available_projects => @available_projects,
-				:acctype_options => [["All", ""]],
+				:acctype_options => @acctype_options,
 				:selected_acctype => ((params[:acctype].blank?)? "" : params[:acctype]).to_i,
 				:selected_projects => @selected_projects,
         :available_users => @available_users	

@@ -38,14 +38,12 @@
                                     :onchange => "selectAllOptions( document.getElementById('selectedprojects[]') );selectAllOptions( document.getElementById('selectednames[]') ); this.form.onsubmit();" %>
       </div>
       <!-- Billing Model  -->
-      <%= @billing %>
-      <% if !@billing_model.nil? %>
+      <% if !@billing_model.nil? and @billing_model_values %>
       <div style="float:right; margin-right:30px;">
-      Billing Model: <br>
-      <%= select_tag 'billing_model', options_for_select(@billing_model.possible_values), 
+      Billing Model:
+      <%= select_tag 'billing_model', options_for_select(@billing_model_values, params[:billing_model]), 
       															:disabled => @disable_acctype_options,
-                                    :onchange => "selectAllOptions( document.getElementById('selectedprojects[]') );selectAllOptions( document.getElementById('selectednames[]') ); this.form.onsubmit();",
-                                    :include_blank => true
+                                    :onchange => "selectAllOptions( document.getElementById('selectedprojects[]') );selectAllOptions( document.getElementById('selectednames[]') ); this.form.onsubmit();"
       											%>
       </div>
       <% end %>
