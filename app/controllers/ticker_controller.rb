@@ -254,7 +254,7 @@ class TickerController < ApplicationController
       available_project_conditions = []
       available_project_conditions << ( (@selected_acctype == 0)? nil : "\"projects\".\"acctg_type\" = #{params[:acctype]}")
       available_project_conditions << ( (params[:selectedprojects].blank?)? nil : "id not in (#{params[:selectedprojects].join(',')})")
-			available_project_conditions << ("id in (#{@project_billing_ids.join(',')})") if !@project_billing_ids.empty? and @billing != "0"
+			available_project_conditions << ("id in (#{@project_billing_ids.join(',')})") if !@project_billing_ids.empty? 
       available_project_conditions = available_project_conditions.compact.join(" and ")
       #available_project_conditions = ( (params[:selectedprojects].blank?)? "" : "id not in (#{params[:selectedprojects].join(',')})")
 
