@@ -215,6 +215,7 @@ class TickerController < ApplicationController
     project_select = "id, name"
     project_order = "name asc"
     
+    @billing = params[:billing_model]
     
     if @query == "user"
       available_user_conditions = []
