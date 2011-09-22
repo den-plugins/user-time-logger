@@ -136,7 +136,8 @@
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <%= l(:label_details) %>: <%= select_tag 'columns', options_for_select([[l(:label_year), 'year'],
                                                                             [l(:label_month), 'month'],
-                                                                            [l(:label_week), 'week']], @columns),
+                                                                            [l(:label_week), 'week'],
+                                                                            ["Day", 'day']], @columns),
                                                         :onchange => "selectAllOptions( document.getElementById('selectedprojects[]') );selectAllOptions( document.getElementById('selectednames[]') );this.form.onsubmit();" %>
     <%= select_tag 'show_only', options_for_select([["Both", 'both'],
                                                   ["Billable", 'billable'],
