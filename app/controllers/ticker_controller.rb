@@ -187,7 +187,14 @@ class TickerController < ApplicationController
   
 
   def update_time_entries_simple
-    
+   	@billing_model = CustomField.find_by_name('Billing Model')
+
+  	if @billing_model
+	  	@billing_model_values = [["Please Select", "0"]]
+	  	@billing_model_values << @billing_model.possible_values
+	  end
+
+
     retrieve_date_range(params[:period_type],params[:period])
     @columns = (params[:columns] && %w(year month week day).include?(params[:columns])) ? params[:columns] : 'month'
     @query = (params[:query].blank?)? "user" : params[:query]

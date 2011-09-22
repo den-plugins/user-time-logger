@@ -37,6 +37,17 @@
                                     :disabled => @disable_acctype_options,
                                     :onchange => "selectAllOptions( document.getElementById('selectedprojects[]') );selectAllOptions( document.getElementById('selectednames[]') ); this.form.onsubmit();" %>
       </div>
+      <!-- Billing Model  -->
+      <% if !@billing_model.nil? %>
+      <div style="float:right; margin-right:30px;">
+      Billing Model: <br>
+      <%= select_tag 'billing_model', options_for_select(@billing_model.possible_values), 
+      															:disabled => @disable_acctype_options,
+                                    :onchange => "selectAllOptions( document.getElementById('selectedprojects[]') );selectAllOptions( document.getElementById('selectednames[]') ); this.form.onsubmit();",
+                                    :include_blank => true
+      											%>
+      </div>
+      <% end %>
       </div>
       <div style="vertical-align:top; float:left; margin: 0px; padding: 0px; width:100px; align:center;">
         <br/>
