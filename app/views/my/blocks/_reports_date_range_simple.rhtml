@@ -24,19 +24,40 @@
       </div>
       <div style="vertical-align:top; float:left; margin: 0px; padding: 0px; width:300px;">
       Available Projects
-      <%= select_tag 'availableprojects', options_from_collection_for_select(@available_projects, "id", "name"  ), 
+      <%= select_tag 'availableprojects', options_from_collection_for_select(available_projects, "id", "name"  ), 
                                       :multiple => true, 
                                       :size => 10,
                                       "onDblClick" => "moveSelectedOptions($('availableprojects'),$('selectedprojects[]'),true,'')",
                                       :style => "width:270px;",
                                       :name => "availableprojects",
                                       :class => "project" %>
+
+      <% if !@project_type.nil? and @project_type_values %>
+      <div style="float:right; margin-right:30px;">
+      Project Type:
+      <%= select_tag 'project_type', options_for_select(@project_type_values, params[:project_type]), 
+      															:disabled => @disable_acctype_options,
+                                    :onchange => "selectAllOptions( document.getElementById('selectedprojects[]') );selectAllOptions( document.getElementById('selectednames[]') ); this.form.onsubmit();"
+      											%>
+      </div>
+      <% end %>                                      
+                                      
       <div style="float:right; margin-right:30px;">
       Accounting Type: 
-      <%= select_tag 'acctype', options_for_select(@acctype_options, @selected_acctype),
+      <%= select_tag 'acctype', options_for_select(acctype_options, selected_acctype),
                                     :disabled => @disable_acctype_options,
                                     :onchange => "selectAllOptions( document.getElementById('selectedprojects[]') );selectAllOptions( document.getElementById('selectednames[]') ); this.form.onsubmit();" %>
       </div>
+      <!-- Billing Model  -->
+      <% if !@billing_model.nil? and @billing_model_values %>
+      <div style="float:right; margin-right:30px;">
+      Billing Model:
+      <%= select_tag 'billing_model', options_for_select(@billing_model_values, params[:billing_model]), 
+      															:disabled => @disable_acctype_options,
+                                    :onchange => "selectAllOptions( document.getElementById('selectedprojects[]') );selectAllOptions( document.getElementById('selectednames[]') ); this.form.onsubmit();"
+      											%>
+      </div>
+      <% end %>
       </div>
       <div style="vertical-align:top; float:left; margin: 0px; padding: 0px; width:100px; align:center;">
         <br/>
@@ -70,7 +91,7 @@
       </div>
       <div style="vertical-align:top; float:left; margin: 0px; padding: 0px; width:300px;">
       Available Names 
-      <%= select_tag 'availablenames', options_from_collection_for_select(@available_users, "id", "name"  ), 
+      <%= select_tag 'availablenames', options_from_collection_for_select(available_users, "id", "name"  ), 
                                       :multiple => true, 
                                       :size => 10,
                                       "onDblClick" => "moveSelectedOptions($('availablenames'],$('selectednames'],true,'')",
@@ -124,7 +145,8 @@
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <%= l(:label_details) %>: <%= select_tag 'columns', options_for_select([[l(:label_year), 'year'],
                                                                             [l(:label_month), 'month'],
-                                                                            [l(:label_week), 'week']], @columns),
+                                                                            [l(:label_week), 'week'],
+                                                                            ["Day", 'day']], @columns),
                                                         :onchange => "selectAllOptions( document.getElementById('selectedprojects[]') );selectAllOptions( document.getElementById('selectednames[]') );this.form.onsubmit();" %>
     <%= select_tag 'show_only', options_for_select([["Both", 'both'],
                                                   ["Billable", 'billable'],
