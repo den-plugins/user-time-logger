@@ -31,6 +31,17 @@
                                       :style => "width:270px;",
                                       :name => "availableprojects",
                                       :class => "project" %>
+
+      <% if !@project_type.nil? and @project_type_values %>
+      <div style="float:right; margin-right:30px;">
+      Project Type:
+      <%= select_tag 'project_type', options_for_select(@project_type_values, params[:project_type]), 
+      															:disabled => @disable_acctype_options,
+                                    :onchange => "selectAllOptions( document.getElementById('selectedprojects[]') );selectAllOptions( document.getElementById('selectednames[]') ); this.form.onsubmit();"
+      											%>
+      </div>
+      <% end %>                                      
+                                      
       <div style="float:right; margin-right:30px;">
       Accounting Type: 
       <%= select_tag 'acctype', options_for_select(acctype_options, selected_acctype),

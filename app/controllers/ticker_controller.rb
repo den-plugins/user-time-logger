@@ -195,6 +195,15 @@ class TickerController < ApplicationController
 	  		@billing_model_values << v
 	  	end
 	  end
+	  
+   	@project_type = CustomField.find_by_name('Project Type')
+
+  	if @project_type
+	  	@project_type_values = [["Please Select", "0"]]
+	  	@project_type.possible_values.each_line do |line|
+	  		@project_type_values << line
+	  	end
+	  end	  
 
 
     retrieve_date_range(params[:period_type],params[:period])
@@ -224,6 +233,12 @@ class TickerController < ApplicationController
     	@project_billing_ids << x.customized_id
     end if billings
 
+    @projtype = params[:project_type]
+    @project_type_ids = []
+    projtypes = CustomValue.find_all_by_value(@projtype)
+    projtypes.each do |x|
+    	@project_type_ids << x.customized_id
+    end if projtypes
 
     if @query == "user"
       available_user_conditions = []
@@ -255,6 +270,7 @@ class TickerController < ApplicationController
       available_project_conditions << ( (@selected_acctype == 0)? nil : "\"projects\".\"acctg_type\" = #{params[:acctype]}")
       available_project_conditions << ( (params[:selectedprojects].blank?)? nil : "id not in (#{params[:selectedprojects].join(',')})")
 			available_project_conditions << ("id in (#{@project_billing_ids.join(',')})") if !@project_billing_ids.empty? and @billing != "0"
+			available_project_conditions << ("id in (#{@project_type_ids.join(',')})") if !@project_type_ids.empty? and @projtype != "0"
       available_project_conditions = available_project_conditions.compact.join(" and ")
       #available_project_conditions = ( (params[:selectedprojects].blank?)? "" : "id not in (#{params[:selectedprojects].join(',')})")
 
