@@ -200,7 +200,7 @@ class TickerController < ApplicationController
 
   	if @project_type
 	  	@project_type_values = [["All", "0"]]
-	  	@project_type.possible_values.each_line do |line|
+	  	@project_type.possible_values.each do |line|
 	  		@project_type_values << line
 	  	end
 	  end	  
