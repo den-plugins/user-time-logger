@@ -264,12 +264,12 @@ class TickerController < ApplicationController
     else
 
 
-    	@project_billing_ids = [0] if @project_billing_ids.empty? and @billing != 0 and @billing != nil
+    	@project_billing_ids = [0] if @project_billing_ids.empty? and @billing != 0 and !@billing.nil?
     	@project_type_ids = [0] if @project_type_ids.empty? and @projtype != 0 and @projtype != nil
       available_project_conditions = []
       available_project_conditions << ( (@selected_acctype == 0)? nil : "\"projects\".\"acctg_type\" = #{params[:acctype]}")
       available_project_conditions << ( (params[:selectedprojects].blank?)? nil : "id not in (#{params[:selectedprojects].join(',')})")
-			available_project_conditions << ("id in (#{@project_billing_ids.join(',')})") if !@project_billing_ids.empty? and @billing != "0" and @billing != ""
+			available_project_conditions << ("id in (#{@project_billing_ids.join(',')})") if !@project_billing_ids.empty? and @billing != "0" and !@billing.nil?
 			available_project_conditions << ("id in (#{@project_type_ids.join(',')})") if !@project_type_ids.empty? and @projtype != "0" and @projtype != ""
       available_project_conditions = available_project_conditions.compact.join(" and ")
       #available_project_conditions = ( (params[:selectedprojects].blank?)? "" : "id not in (#{params[:selectedprojects].join(',')})")

@@ -46,7 +46,8 @@
       Accounting Type: 
       <%= select_tag 'acctype', options_for_select(acctype_options, selected_acctype),
                                     :disabled => @disable_acctype_options,
-                                    :onchange => "selectAllOptions( document.getElementById('selectedprojects[]') );selectAllOptions( document.getElementById('selectednames[]') ); this.form.onsubmit();" %>
+                                    :onchange => "selectAllOptions( document.getElementById('selectedprojects[]') );selectAllOptions( document.getElementById('selectednames[]') ); this.form.onsubmit();",
+                                    :style => "width:150px" %>
       </div>
       <!-- Billing Model  -->
       <% if !@billing_model.nil? and @billing_model_values %>
@@ -54,7 +55,8 @@
       Billing Model:
       <%= select_tag 'billing_model', options_for_select(@billing_model_values, params[:billing_model]), 
       															:disabled => @disable_acctype_options,
-                                    :onchange => "selectAllOptions( document.getElementById('selectedprojects[]') );selectAllOptions( document.getElementById('selectednames[]') ); this.form.onsubmit();"
+                                    :onchange => "selectAllOptions( document.getElementById('selectedprojects[]') );selectAllOptions( document.getElementById('selectednames[]') ); this.form.onsubmit();",
+                                    :style => "width:150px"
       											%>
       </div>
       <% end %>
