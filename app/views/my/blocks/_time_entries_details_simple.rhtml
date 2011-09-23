@@ -6,7 +6,17 @@
               end %>
 <h4><%= l(:label_by_project_or_user_report, :option => selected) %></h4>
 
-<%= render :partial => "my/blocks/reports_date_range_simple", :locals => {:option => option, :view => params[:view]}%>
+<%= render :partial => "my/blocks/reports_date_range_simple", 
+		:locals => {
+				:option => option, 
+				:view => params[:view], 
+				:available_projects => @available_projects,
+				:acctype_options => @acctype_options,
+				:selected_acctype => ((params[:acctype].blank?)? "" : params[:acctype]).to_i,
+				:selected_projects => @selected_projects,
+        :available_users => @available_users	
+				
+				}%>
 
 <div style="overflow: auto;">
 
@@ -28,7 +38,7 @@
         <th rowspan="3" >SOW Rates (<%=html_hours("%.2f" % @total_sow_rates.to_f)%>) </th>
         <th rowspan="3" >Computed SOW Rates (<%=html_hours("%.2f" % @total_computed_sow_rates.to_f)%>) </th>
         <% end %>
-        <%=header %>
+        <%#=header %>
       </tr>
 	  </thead>
 	  
