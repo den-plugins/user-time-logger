@@ -44,15 +44,31 @@ module TimeEntryExtn
         time_entry.attributes=(default_attribute.merge(time_entries[id]))
         activ = Enumeration.activities.select{|a|a.id == time_entries[id][:activity_id].to_i}
         time_entry.comments = time_entries[id][:comments].empty? ? (activ.empty? ? "Logged spent time." : "Logged spent time. Doing #{activ.first.name} on #{issue.subject}.") : time_entries[id][:comments]
-        if time_entry.save
-          total_time_entry = TimeEntry.sum(:hours, :conditions => "issue_id = #{time_entry.issue.id}")
-          if !time_entry.issue.estimated_hours.nil?
-            remaining_estimate = time_entry.issue.estimated_hours - total_time_entry
-            journal.details << JournalDetail.new(:property => 'timelog', :prop_key => 'remaining_estimate', :value => remaining_estimate >= 0 ? remaining_estimate : 0)
+
+        total_hours = 0.0
+        unless time_entry.hours.nil?
+          total_hours += time_entry.hours
+        end
+        total_entries = User.find(time_entry.user_id).time_entries.find(:all, :conditions => "spent_on = '#{time_entry.spent_on}'")
+        total_entries.each do |v|
+          total_hours += v.hours
+        end
+
+
+        if total_hours <= 24
+          if time_entry.save
+            total_time_entry = TimeEntry.sum(:hours, :conditions => "issue_id = #{time_entry.issue.id}")
+            if !time_entry.issue.estimated_hours.nil?
+              remaining_estimate = time_entry.issue.estimated_hours - total_time_entry
+              journal.details << JournalDetail.new(:property => 'timelog', :prop_key => 'remaining_estimate', :value => remaining_estimate >= 0 ? remaining_estimate : 0)
+            end
+            journal.save
+            saved_time_entries << time_entry
+          else
+            unsaved_time_entries << time_entry
           end
-          journal.save
-          saved_time_entries << time_entry
         else
+          time_entry.errors.add_to_base "Can't logged more than 24 hours"
           unsaved_time_entries << time_entry
         end
       end
