@@ -30,6 +30,11 @@ module TimeEntryExtn
     def save_time_entries(user, issue_ids=[], time_entries={})
       saved_time_entries = []
       unsaved_time_entries = []
+      total_hours = 0.0
+      rate = 0
+      issue_is_billable = false
+      accept_time_log = false
+
       default_attribute = { :comments => 'Logged spent time.',
                             :user => user}
       issue_ids.each do |id|
@@ -45,7 +50,6 @@ module TimeEntryExtn
         activ = Enumeration.activities.select{|a|a.id == time_entries[id][:activity_id].to_i}
         time_entry.comments = time_entries[id][:comments].empty? ? (activ.empty? ? "Logged spent time." : "Logged spent time. Doing #{activ.first.name} on #{issue.subject}.") : time_entries[id][:comments]
 
-        total_hours = 0.0
         unless time_entry.hours.nil?
           total_hours += time_entry.hours
         end
@@ -54,8 +58,18 @@ module TimeEntryExtn
           total_hours += v.hours
         end
 
+        Project.find(project.id).members.project_team.each do |m|
+          if time_entry.user_id == m.user_id
+            rate = m.internal_rate
+          end
+        end
 
-        if total_hours <= 24
+        issue_is_billable = true if Issue.find(issue.id).acctg_type == Enumeration.find_by_name('Billable').id
+
+        accept_time_log = true if (issue_is_billable && rate > 0) || (!issue_is_billable && rate == 0) ||
+                                  (!issue_is_billable && rate > 0)
+
+        if total_hours <= 24 && accept_time_log
           if time_entry.save
             total_time_entry = TimeEntry.sum(:hours, :conditions => "issue_id = #{time_entry.issue.id}")
             if !time_entry.issue.estimated_hours.nil?
@@ -68,7 +82,8 @@ module TimeEntryExtn
             unsaved_time_entries << time_entry
           end
         else
-          time_entry.errors.add_to_base "Can't logged more than 24 hours"
+          time_entry.errors.add_to_base "Can't logged more than 24 hours." unless total_hours <= 24
+          time_entry.errors.add_to_base "You are not allowed to log time to this task." unless accept_time_log
           unsaved_time_entries << time_entry
         end
       end
