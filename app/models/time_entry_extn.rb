@@ -59,8 +59,8 @@ module TimeEntryExtn
         end
 
         Project.find(project.id).members.project_team.each do |m|
-          if time_entry.user_id == m.user_id
-            rate = m.internal_rate
+          if (time_entry.user_id == m.user_id) && m.internal_rate
+            rate = m.internal_rate 
           end
         end
 
