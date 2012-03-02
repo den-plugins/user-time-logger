@@ -1,0 +1,24 @@
+= Management Plugin for Redmine
+
+This plugin provides a set of convenience capabilities for easier management of resources. Useful for tracking billability and providing reports.
+
+= Installation
+
+1. Extract or clone the plugin to vendor/plugins as user_time_logger
+3. Run <tt>rake db:migrate_plugins</tt> from RAILS_ROOT
+4. Restart Redmine
+
+= Dependencies
+
+This plugin depends on the ff. plugins to run:
+
+= Compatibility
+
+This plugin has only been tested in the following environments:
+
+* Firefox 3.5.x Mac OS X
+* Redmine 0.8.4 (including a private fork based on 0.8.0)
+
+= License
+
+This plugin is released under the MIT license. See LICENSE for more information.
