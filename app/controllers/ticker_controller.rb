@@ -195,6 +195,15 @@ class TickerController < ApplicationController
 	  		@billing_model_values << v
 	  	end
 	  end
+	  
+   	@project_type = CustomField.find_by_name('Project Type')
+
+  	if @project_type
+	  	@project_type_values = [["Please Select", "0"]]
+	  	@project_type.possible_values.each_line do |line|
+	  		@project_type_values << line
+	  	end
+	  end	  
 
    	@project_type = CustomField.find_by_name('Project Type')
 
