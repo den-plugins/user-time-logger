@@ -1,4 +1,4 @@
-= Management Plugin for Redmine
+= Time logging Plugin for Redmine
 
 This plugin provides a set of convenience capabilities for easier management of resources. Useful for tracking billability and providing reports.
 
