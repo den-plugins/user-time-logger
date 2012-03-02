@@ -1,12 +1,21 @@
 = Time logging Plugin for Redmine
 
-This plugin provides a set of convenience capabilities for easier management of resources. Useful for tracking billability and providing reports.
+This plugin provides a set of convenience capabilities for bulk time logging in Redmine. Useful for people with multiple projects and working on different tasks.
+This will provide an option in My Page to display Time logging block.
+A summary (for the last 7 days) of log hours in all projects will be displayed with a link to display all time logs.
 
 = Installation
 
 1. Extract or clone the plugin to vendor/plugins as user_time_logger
 3. Run <tt>rake db:migrate_plugins</tt> from RAILS_ROOT
 4. Restart Redmine
+
+= To use
+1. Go to My Page
+2. Choose Personalize this page.
+3. Choose 'Time logging'
+4. Click Add.
+5. Click Save.
 
 = Dependencies
 
