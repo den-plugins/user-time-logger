@@ -5,12 +5,12 @@
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
-#
+# 
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-#
+# 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -21,14 +21,14 @@ class TimelogController < ApplicationController
   before_filter :find_optional_project, :only => [:report, :details]
 
   verify :method => :post, :only => :destroy, :redirect_to => { :action => :details }
-
+  
   helper :sort
   include SortHelper
   helper :issues
   include TimelogHelper
   helper :custom_fields
   include CustomFieldsHelper
-
+  
   def report
     @available_criterias = { 'project' => {:sql => "#{TimeEntry.table_name}.project_id",
                                           :klass => Project,
@@ -52,9 +52,9 @@ class TimelogController < ApplicationController
                              'issue' => {:sql => "#{TimeEntry.table_name}.issue_id",
                                          :klass => Issue,
                                          :label => :label_issue}
-
+                             
                            }
-
+    
     # Add list and boolean custom fields as available criterias
     custom_fields = (@project.nil? ? IssueCustomField.for_all : @project.all_issue_custom_fields)
     custom_fields.select {|cf| %w(list bool).include? cf.field_format }.each do |cf|
@@ -62,32 +62,32 @@ class TimelogController < ApplicationController
                                              :format => cf.field_format,
                                              :label => cf.name}
     end if @project
-
+    
     # Add list and boolean time entry custom fields
     TimeEntryCustomField.find(:all).select {|cf| %w(list bool).include? cf.field_format }.each do |cf|
       @available_criterias["cf_#{cf.id}"] = {:sql => "(SELECT c.value FROM #{CustomValue.table_name} c WHERE c.custom_field_id = #{cf.id} AND c.customized_type = 'TimeEntry' AND c.customized_id = #{TimeEntry.table_name}.id)",
                                              :format => cf.field_format,
                                              :label => cf.name}
     end
-
+    
     @criterias = params[:criterias] || []
     @criterias = @criterias.select{|criteria| @available_criterias.has_key? criteria}
     @criterias.uniq!
     @criterias = @criterias[0,3]
     @columns = (params[:columns] && %w(year month week day).include?(params[:columns])) ? params[:columns] : 'month'
-
+    
     retrieve_date_range
-
+    
     unless @criterias.empty?
       sql_select = @criterias.collect{|criteria| @available_criterias[criteria][:sql] + " AS " + criteria}.join(', ')
       sql_group_by = @criterias.collect{|criteria| @available_criterias[criteria][:sql]}.join(', ')
-
+      
       sql = "SELECT #{sql_select}, tyear, tmonth, tweek, spent_on, SUM(hours) AS hours, #{Issue.table_name}.acctg_type AS accounting"
       sql << " FROM #{TimeEntry.table_name}"
       sql << " LEFT JOIN #{User.table_name} ON #{TimeEntry.table_name}.user_id = #{User.table_name}.id"
       sql << " LEFT JOIN #{Issue.table_name} ON #{TimeEntry.table_name}.issue_id = #{Issue.table_name}.id"
       sql << " LEFT JOIN #{Project.table_name} ON #{TimeEntry.table_name}.project_id = #{Project.table_name}.id"
-
+      
       sql << " LEFT JOIN #{Member.table_name} ON #{User.table_name}.id = #{Member.table_name}.user_id and #{Member.table_name}.project_id = #{Project.table_name}.id"
       sql << " LEFT JOIN #{Role.table_name} ON #{Member.table_name}.role_id = #{Role.table_name}.id" if @criterias.include?('member')
       sql << " WHERE"
@@ -97,7 +97,7 @@ class TimelogController < ApplicationController
       sql << " GROUP BY #{sql_group_by}, tyear, tmonth, tweek, spent_on, #{Issue.table_name}.acctg_type"
       sql << " ORDER BY roles.name asc, users.firstname asc" if @criterias.include?('member')
       @hours = ActiveRecord::Base.connection.select_all(sql)
-
+      
       @hours.each do |row|
         case @columns
         when 'year'
@@ -110,9 +110,9 @@ class TimelogController < ApplicationController
           row['day'] = "#{row['spent_on']}"
         end
       end
-
+      
       @details = []
-
+      
       if @criterias.include?('member')
         @subtotals = Hash.new
         @tx = 0
@@ -121,12 +121,12 @@ class TimelogController < ApplicationController
             @subtotals[hour["name"]] = hour["hours"].to_f
           else
             @subtotals[hour["name"]] += hour["hours"].to_f
-          end
+          end       
           @tx += hour["hours"].to_f
         end
       end
-
-
+      
+        
       accounting = Enumeration.accounting_types
       accounting.each do |atyp|
         hr = @hours.select {|h| h['accounting'].to_i == atyp.id.to_i}
@@ -136,9 +136,9 @@ class TimelogController < ApplicationController
         detail[:total_hours] = total
         detail[:hour] = hr
         @details << detail
-
+        
       end
-
+      
       @periods = []
       # Date#at_beginning_of_ not supported in Rails 1.2.x
       date_from = @from.to_time
@@ -160,13 +160,13 @@ class TimelogController < ApplicationController
         end
       end
     end
-
+    
     respond_to do |format|
       format.html { render :layout => !request.xhr? }
       format.csv  { send_data(report_to_csv(@criterias, @periods, @hours).read, :type => 'text/csv; header=present', :filename => 'timelog.csv') }
     end
   end
-
+  
   def details
     sort_init 'spent_on', 'desc'
     sort_update 'spent_on' => 'spent_on',
@@ -175,7 +175,7 @@ class TimelogController < ApplicationController
                 'project' => "#{Project.table_name}.name",
                 'issue' => 'issue_id',
                 'hours' => 'hours'
-
+    
     cond = ARCondition.new
     if @project.nil?
       cond << Project.allowed_to_condition(User.current, :view_time_entries)
@@ -184,9 +184,9 @@ class TimelogController < ApplicationController
     else
       cond << ["#{TimeEntry.table_name}.issue_id = ?", @issue.id]
     end
-
+    
     @logtime_allowed = TimeEntry.logtime_allowed?(User.current, @project)
-
+    
     retrieve_date_range
     cond << ['spent_on BETWEEN ? AND ?', @from, @to]
 
@@ -196,7 +196,7 @@ class TimelogController < ApplicationController
           # Paginate results
           @entry_count = TimeEntry.count(:include => :project, :conditions => cond.conditions)
           @entry_pages = Paginator.new self, @entry_count, per_page_option, params['page']
-          @entries = TimeEntry.find(:all,
+          @entries = TimeEntry.find(:all, 
                                     :include => [:project, :activity, :user, {:issue => :tracker}],
                                     :conditions => cond.conditions,
                                     :order => sort_clause,
@@ -216,7 +216,7 @@ class TimelogController < ApplicationController
         }
         format.csv {
           # Export all entries
-          @entries = TimeEntry.find(:all,
+          @entries = TimeEntry.find(:all, 
                                     :include => [:project, :activity, :user, {:issue => [:tracker, :assigned_to, :priority]}],
                                     :conditions => cond.conditions,
                                     :order => sort_clause)
@@ -225,68 +225,30 @@ class TimelogController < ApplicationController
       end
     end
   end
-
+  
   def edit
-    total_hours = 0.0
-        user_is_member = false
-        rate = 0
-        issue_is_billable = false
-        accept_time_log = false
-
-        render_403 and return if @time_entry && !@time_entry.editable_by?(User.current)
-        @time_entry ||= TimeEntry.new(:project => @project, :issue => @issue, :user => User.current, :spent_on => Date.today)
-        time_entry_clone = @time_entry.clone
-        @time_entry.attributes = params[:time_entry]
-
-        @total_entries = User.find(@time_entry.user_id).time_entries.find(:all, :conditions => "spent_on = '#{@time_entry.spent_on}'")
-        @total_entries.each do |v|
-          total_hours += v.hours
+    render_403 and return if @time_entry && !@time_entry.editable_by?(User.current)
+    @time_entry ||= TimeEntry.new(:project => @project, :issue => @issue, :user => User.current, :spent_on => Date.today)
+#    issue_clone = @issue.clone
+    time_entry_clone = @time_entry.clone
+    @time_entry.attributes = params[:time_entry]
+    TimeEntry.transaction do
+      if request.post? and @time_entry.save
+        total_time_entry = TimeEntry.sum(:hours, :conditions => "issue_id = #{@time_entry.issue.id}")
+        journal = @time_entry.init_journal(User.current)
+        journal.details << JournalDetail.new(:property => 'timelog', :prop_key => 'hours', :old_value => (time_entry_clone.hours if time_entry_clone.hours != @time_entry.hours), :value => @time_entry.hours)
+        journal.details << JournalDetail.new(:property => 'timelog', :prop_key => 'activity_id', :old_value => (time_entry_clone.activity_id if !time_entry_clone.activity_id.eql?(@time_entry.activity_id)), :value => @time_entry.activity_id)
+        journal.details << JournalDetail.new(:property => 'timelog', :prop_key => 'spent_on', :old_value => (time_entry_clone.spent_on if !time_entry_clone.spent_on.eql?(@time_entry.spent_on)), :value => @time_entry.spent_on)
+        if !@time_entry.issue.estimated_hours.nil?
+          remaining_estimate = @time_entry.issue.estimated_hours - total_time_entry
+          journal.details << JournalDetail.new(:property => 'timelog', :prop_key => 'remaining_estimate', :value => remaining_estimate >= 0 ? remaining_estimate : 0)
         end
-
-        Project.find(@project.id).members.project_team.each do |m|
-          if @time_entry.user_id == m.user_id
-            user_is_member = true
-            rate = m.internal_rate ? m.internal_rate : 0
-          end
-        end
-
-        issue_is_billable = true if Issue.find(@issue.id).acctg_type == Enumeration.find_by_name('Billable').id
-
-        if rate
-        accept_time_log = true if (issue_is_billable && rate > 0) || (!issue_is_billable && rate == 0)  ||
-            (!issue_is_billable && rate > 0)
-        end
-
-          TimeEntry.transaction do
-            if request.post?
-              total_time_entry = TimeEntry.sum(:hours, :conditions => "issue_id = #{@time_entry.issue.id}")
-              journal = @time_entry.init_journal(User.current)
-              journal.details << JournalDetail.new(:property => 'timelog', :prop_key => 'hours', :old_value => (time_entry_clone.hours if time_entry_clone.hours != @time_entry.hours), :value => @time_entry.hours)
-              journal.details << JournalDetail.new(:property => 'timelog', :prop_key => 'activity_id', :old_value => (time_entry_clone.activity_id if !time_entry_clone.activity_id.eql?(@time_entry.activity_id)), :value => @time_entry.activity_id)
-              journal.details << JournalDetail.new(:property => 'timelog', :prop_key => 'spent_on', :old_value => (time_entry_clone.spent_on if !time_entry_clone.spent_on.eql?(@time_entry.spent_on)), :value => @time_entry.spent_on)
-              if !@time_entry.issue.estimated_hours.nil?
-                remaining_estimate = @time_entry.issue.estimated_hours - total_time_entry
-                journal.details << JournalDetail.new(:property => 'timelog', :prop_key => 'remaining_estimate', :value => remaining_estimate >= 0 ? remaining_estimate : 0)
-              end
-              unless @time_entry.hours.nil?
-                total_hours += @time_entry.hours
-              end
-
-              if total_hours <= 24 && user_is_member && accept_time_log
-                if @time_entry.save
-                  journal.save
-                  return call_mystic_process_billable_hours(@issue.id, params[:time_entry])
-                end
-              else
-                flash[:error] = "Can't logged more than 24 hours." unless total_hours <= 24
-                flash[:error] = "User is not a member of this project." unless user_is_member
-                flash[:error] = "You are not allowed to log time to this task." unless accept_time_log
-              end
-
-            end
-          end
+        journal.save
+        return call_mystic_process_billable_hours(@issue.id, params[:time_entry])
+      end
+    end
   end
-
+  
   def destroy
     render_404 and return unless @time_entry
     render_403 and return unless @time_entry.editable_by?(User.current)
@@ -317,7 +279,7 @@ private
   rescue ActiveRecord::RecordNotFound
     render_404
   end
-
+  
   def find_optional_project
     if !params[:issue_id].blank?
       @issue = Issue.find(params[:issue_id])
@@ -327,7 +289,7 @@ private
     end
     deny_access unless User.current.allowed_to?(:view_time_entries, @project, :global => true)
   end
-
+  
   # Retrieves the date range based on predefined ranges or specific from/to param dates
   def retrieve_date_range
     @free_period = false
@@ -370,7 +332,7 @@ private
       # default
       current_month
     end
-
+    
     @from, @to = @to, @from if @from && @to && @from > @to
     @from ||= (TimeEntry.minimum(:spent_on, :include => :project, :conditions => Project.allowed_to_condition(User.current, :view_time_entries)) || Date.today) - 1
     @to   ||= (TimeEntry.maximum(:spent_on, :include => :project, :conditions => Project.allowed_to_condition(User.current, :view_time_entries)) || Date.today)

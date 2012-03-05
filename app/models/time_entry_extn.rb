@@ -82,7 +82,7 @@ module TimeEntryExtn
             unsaved_time_entries << time_entry
           end
         else
-          time_entry.errors.add_to_base "Can't logged more than 24 hours." unless total_hours <= 24
+          time_entry.errors.add_to_base "Cannot log more than 24 hours per day" unless total_hours <= 24
           time_entry.errors.add_to_base "You are not allowed to log time to this task." unless accept_time_log
           unsaved_time_entries << time_entry
         end

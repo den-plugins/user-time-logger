@@ -69,7 +69,7 @@ class CustomTimelogController < TimelogController
               return call_mystic_process_billable_hours(@issue.id, params[:time_entry])
             end
           else
-            flash[:error] = "Can't logged more than 24 hours." unless total_hours <= 24
+            flash[:error] = "Cannot log more than 24 hours per day" unless total_hours <= 24
             flash[:error] = "User is not a member of this project." unless user_is_member
             flash[:error] = "You are not allowed to log time to this task." unless accept_time_log
             flash[:error] = "Please log hours in a generic non-billable task. " unless budget_consumed == false
