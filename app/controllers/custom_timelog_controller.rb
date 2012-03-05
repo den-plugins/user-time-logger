@@ -26,23 +26,22 @@ class CustomTimelogController < TimelogController
         total_hours += v.hours
       end
 
-      Project.find(@project.id).members.project_team.each do |m|
-        if @time_entry.user_id == m.user_id
-          user_is_member = true
-          rate = m.internal_rate ? m.internal_rate : 0
-        end
-      end
-
       issue_is_billable = true if Issue.find(@issue.id).acctg_type == Enumeration.find_by_name('Billable').id
-
-      if rate
-      accept_time_log = true if (issue_is_billable && rate > 0) || (!issue_is_billable && rate == 0)  ||
-          (!issue_is_billable && rate > 0)
+      if @project.project_type.scan(/^(Admin)/).flatten.present?
+        if membership = @project.members.detect {|m| m.user_id == @time_entry.user_id}
+          user_is_member = true
+          accept_time_log = true
+        end
+      else
+        if membership = @project.members.project_team.detect {|m| m.user_id == @time_entry.user_id}
+          user_is_member = true
+          billable_member = membership.billable?(@time_entry.spent_on, @time_entry.spent_on)
+          accept_time_log = true if ((issue_is_billable && billable_member) || !issue_is_billable)
+        end
       end
 
       if display_by_billing_model.eql?("fixed")
         budget_computation(@project.id)
-
         if (@project_budget - @actuals_to_date) < 0 && issue_is_billable
           budget_consumed = true
         end
@@ -74,10 +73,8 @@ class CustomTimelogController < TimelogController
             flash[:error] = "You are not allowed to log time to this task." unless accept_time_log
             flash[:error] = "Please log hours in a generic non-billable task. " unless budget_consumed == false
           end
-
         end
       end
-
     end
 
 

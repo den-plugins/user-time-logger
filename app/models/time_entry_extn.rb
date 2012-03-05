@@ -58,16 +58,19 @@ module TimeEntryExtn
           total_hours += v.hours
         end
 
-        Project.find(project.id).members.project_team.each do |m|
-          if (time_entry.user_id == m.user_id) && m.internal_rate
-            rate = m.internal_rate 
+        issue_is_billable = true if Issue.find(issue.id).acctg_type == Enumeration.find_by_name('Billable').id
+        if project.project_type.scan(/^(Admin)/).flatten.present?
+          if membership = project.members.detect {|m| m.user_id == time_entry.user_id}
+            user_is_member = true
+            accept_time_log = true
+          end
+        else
+          if membership = project.members.project_team.detect {|m| m.user_id == time_entry.user_id}
+            user_is_member = true
+            billable_member = membership.billable?(time_entry.spent_on, time_entry.spent_on)
+            accept_time_log = true if ((issue_is_billable && billable_member) || !issue_is_billable)
           end
         end
-
-        issue_is_billable = true if Issue.find(issue.id).acctg_type == Enumeration.find_by_name('Billable').id
-
-        accept_time_log = true if (issue_is_billable && rate > 0) || (!issue_is_billable && rate == 0) ||
-                                  (!issue_is_billable && rate > 0)
 
         if total_hours <= 24 && accept_time_log
           if time_entry.save
