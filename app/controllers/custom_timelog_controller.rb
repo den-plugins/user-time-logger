@@ -169,10 +169,12 @@ class CustomTimelogController < TimelogController
         accounting.each do |atyp|
           @hours.each do |hour|
             if hour["accounting"].to_i == atyp.id.to_i
-              if @subtotals[hour["name"] + ',' + "#{atyp.id}"].blank?
-                @subtotals[hour["name"] + ',' + "#{atyp.id}"] = hour["hours"].to_f
-              else
-                @subtotals[hour["name"] + ',' + "#{atyp.id}"] += hour["hours"].to_f
+              unless hour["name"].nil?
+                if @subtotals[hour["name"] + ',' + "#{atyp.id}"].blank?
+                  @subtotals[hour["name"] + ',' + "#{atyp.id}"] = hour["hours"].to_f
+                else
+                  @subtotals[hour["name"] + ',' + "#{atyp.id}"] += hour["hours"].to_f
+                end
               end
               @tx += hour["hours"].to_f
             end
