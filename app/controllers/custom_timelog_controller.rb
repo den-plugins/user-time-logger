@@ -15,6 +15,7 @@ class CustomTimelogController < TimelogController
       issue_is_billable = false
       accept_time_log = false
       budget_consumed = false
+      flash[:error]
 
       render_403 and return if @time_entry && !@time_entry.editable_by?(User.current)
       @time_entry ||= TimeEntry.new(:project => @project, :issue => @issue, :user => User.current, :spent_on => Date.today)
@@ -68,10 +69,10 @@ class CustomTimelogController < TimelogController
               return call_mystic_process_billable_hours(@issue.id, params[:time_entry])
             end
           else
-            flash[:error] = "Cannot log more than 24 hours per day" unless total_hours <= 24
-            flash[:error] = "User is not a member of this project." unless user_is_member
-            flash[:error] = "You are not allowed to log time to this task." unless accept_time_log
-            flash[:error] = "Please log hours in a generic non-billable task. " unless budget_consumed == false
+            @time_entry.errors.add_to_base "Cannot log more than 24 hours per day" unless total_hours <= 24
+            @time_entry.errors.add_to_base "You are not allowed to log time to this task." unless accept_time_log
+            @time_entry.errors.add_to_base "User is not a member of this project." unless user_is_member
+            @time_entry.errors.add_to_base "Please log hours in a generic non-billable task." unless budget_consumed == false
           end
         end
       end
