@@ -15,7 +15,6 @@ class CustomTimelogController < TimelogController
       issue_is_billable = false
       accept_time_log = false
       budget_consumed = false
-      flash[:error]
 
       render_403 and return if @time_entry && !@time_entry.editable_by?(User.current)
       @time_entry ||= TimeEntry.new(:project => @project, :issue => @issue, :user => User.current, :spent_on => Date.today)
@@ -27,7 +26,7 @@ class CustomTimelogController < TimelogController
         total_hours += v.hours
       end
 
-      issue_is_billable = true if Issue.find(@issue.id).acctg_type == Enumeration.find_by_name('Billable').id
+      issue_is_billable = true if Issue.find_by_id(@time_entry.issue_id).accounting.id == Enumeration.find_by_name('Billable').id
       if @project.project_type.scan(/^(Admin)/).flatten.present?
         if membership = @project.members.detect {|m| m.user_id == @time_entry.user_id}
           user_is_member = true
@@ -66,7 +65,7 @@ class CustomTimelogController < TimelogController
           if total_hours <= 24 && user_is_member && accept_time_log && budget_consumed == false
             if @time_entry.save
               journal.save
-              return call_mystic_process_billable_hours(@issue.id, params[:time_entry])
+              return call_mystic_process_billable_hours(@time_entry.issue_id, params[:time_entry])
             end
           else
             @time_entry.errors.add_to_base "Cannot log more than 24 hours per day" unless total_hours <= 24
