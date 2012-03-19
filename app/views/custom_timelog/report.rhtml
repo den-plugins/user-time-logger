@@ -2,7 +2,7 @@
 <%= link_to_if_authorized l(:button_log_time), {:controller => 'timelog', :action => 'edit', :project_id => @project, :issue_id => @issue}, :class => 'icon icon-time-add' %>
 </div>
 
-<%= render_timelog_breadcrumb %>
+<%= custom_render_timelog_breadcrumb %>
 
 <h2><%= l(:label_spent_time) %></h2>
 
