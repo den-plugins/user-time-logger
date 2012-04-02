@@ -11,7 +11,8 @@
  
 class TickerController < ApplicationController
   unloadable
-
+  
+  include FaceboxRender
   helper :scrums
   helper :timelog
   helper :ticker
@@ -483,6 +484,11 @@ class TickerController < ApplicationController
     @tbh = @entries_billable.collect(&:hours).compact.sum
     @tnbh = @entries_non_billable.collect(&:hours).compact.sum
     @th = @tbh + @tnbh
+
+    respond_to do |format|
+      format.html
+      format.js { render_to_facebox :layout => false }
+    end
   end
   
   def update_leave_entries
