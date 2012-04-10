@@ -11,7 +11,6 @@ class CustomTimelogController < TimelogController
     def edit
       total_hours = 0.0
       user_is_member = false
-      rate = 0
       issue_is_billable = false
       accept_time_log = false
       budget_consumed = false
@@ -36,7 +35,9 @@ class CustomTimelogController < TimelogController
         if membership = @project.members.project_team.detect {|m| m.user_id == @time_entry.user_id}
           user_is_member = true
           billable_member = membership.billable?(@time_entry.spent_on, @time_entry.spent_on)
-          accept_time_log = true if ((issue_is_billable && billable_member) || !issue_is_billable)
+          non_billable_member = membership.non_billable?(@time_entry.spent_on)
+          shadow_member = membership.is_shadowed?(@time_entry.spent_on)
+          accept_time_log = true if ((issue_is_billable && billable_member) || (!issue_is_billable && non_billable_member) || (!issue_is_billable && shadow_member))
         end
       end
 
