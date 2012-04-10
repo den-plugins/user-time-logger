@@ -38,7 +38,6 @@ module TimeEntryExtn
       default_attribute = { :comments => 'Logged spent time.',
                             :user => user}
       issue_ids.each do |id|
-        time_entry = nil
         issue = Issue.find(id, :include => :project)
         project = issue.project
         time_entry = TimeEntry.new#TimeEntry.new(default_attribute.merge(time_entries[id]))
@@ -53,29 +52,25 @@ module TimeEntryExtn
         unless time_entry.hours.nil?
           total_hours += time_entry.hours
         end
-        total_entries = User.find(time_entry.user_id).time_entries.find(:all, :conditions => "spent_on = '#{time_entry.spent_on}'")
+        total_entries = User.find(time_entry.user_id).time_entries.find(:all, :conditions => {:spent_on => time_entry.spent_on})
         total_entries.each do |v|
           total_hours += v.hours
         end
 
-        issue_is_billable = true if Issue.find(issue.id).acctg_type == Enumeration.find_by_name('Billable').id
-        if project.project_type.scan(/^(Admin)/).flatten.present?
-          if membership = project.members.detect {|m| m.user_id == time_entry.user_id}
-            user_is_member = true
-            accept_time_log = true
-          end
-        else
-          if membership = project.members.project_team.detect {|m| m.user_id == time_entry.user_id}
-            user_is_member = true
-            billable_member = membership.billable?(time_entry.spent_on, time_entry.spent_on)
-            accept_time_log = true if ((issue_is_billable && billable_member) || !issue_is_billable)
-          end
-        end
+        membership = (project.admin? ? project.members : project.members.project_team).find_by_user_id(time_entry.user_id)
+        user_is_member = !membership.nil?
+        issue_is_billable = (issue.acctg_type == Enumeration.find_by_name('Billable').id)
+        billable_member = user_is_member && membership.billable?(time_entry.spent_on, time_entry.spent_on)
+        member_allocated_billable = user_is_member && issue_is_billable && membership.allocated?(time_entry.spent_on)
+        member_allocated_non_billable = user_is_member && !issue_is_billable && !membership.resource_allocations.empty?
+        member_allocated = member_allocated_billable || member_allocated_non_billable
+
+        accept_time_log = (project.admin? || ((issue_is_billable && billable_member) || !issue_is_billable)) && member_allocated
 
         if total_hours <= 24 && accept_time_log
           if time_entry.save
-            total_time_entry = TimeEntry.sum(:hours, :conditions => "issue_id = #{time_entry.issue.id}")
-            if !time_entry.issue.estimated_hours.nil?
+            total_time_entry = TimeEntry.sum(:hours, :conditions => {:issue_id => time_entry.issue.id})
+            unless time_entry.issue.estimated_hours.nil?
               remaining_estimate = time_entry.issue.estimated_hours - total_time_entry
               journal.details << JournalDetail.new(:property => 'timelog', :prop_key => 'remaining_estimate', :value => remaining_estimate >= 0 ? remaining_estimate : 0)
             end
@@ -86,7 +81,13 @@ module TimeEntryExtn
           end
         else
           time_entry.errors.add_to_base "Cannot log more than 24 hours per day" unless total_hours <= 24
-          time_entry.errors.add_to_base "You are not allowed to log time to this task." unless accept_time_log
+          time_entry.errors.add_to_base "User is not a member of #{project.name}." unless user_is_member
+          if !member_allocated_billable
+            time_entry.errors.add_to_base "User is not allocated/billable in #{project.name} on #{time_entry.spent_on.strftime("%m/%d/%Y")}."
+          elsif !member_allocated_non_billable
+            time_entry.errors.add_to_base "User has not been allocated in #{project.name}."
+          end
+          time_entry.errors.add_to_base "You are not allowed to log time to this task." unless issue_is_billable || billable_member
           unsaved_time_entries << time_entry
         end
       end
