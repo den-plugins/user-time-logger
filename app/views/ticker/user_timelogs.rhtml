@@ -3,7 +3,7 @@
     <div id="time_entries_details">
       <h2>Time Logs: <%=@user.name(:lastname_coma_firstname) %> </h2>
       <h3>Date covered: <%=@from%> - <%=@to%> </h3>
-      <div style="min-width: 900px; max-height: 385px; overflow: auto;">
+      <div style="<%= params[:env].eql?('popup') ? 'max-width: 900px; ' : nil %>max-height: 385px; overflow: auto;">
         
         <table class="list time-entries" style="text-align:center;">
 	        <thead>
