@@ -30,15 +30,10 @@ module TimeEntryExtn
     def save_time_entries(user, issue_ids=[], time_entries={})
       saved_time_entries = []
       unsaved_time_entries = []
-      total_hours = 0.0
-      rate = 0
-      issue_is_billable = false
-      accept_time_log = false
 
       default_attribute = { :comments => 'Logged spent time.',
                             :user => user}
       issue_ids.each do |id|
-        time_entry = nil
         issue = Issue.find(id, :include => :project)
         project = issue.project
         time_entry = TimeEntry.new#TimeEntry.new(default_attribute.merge(time_entries[id]))
@@ -49,44 +44,15 @@ module TimeEntryExtn
         time_entry.attributes=(default_attribute.merge(time_entries[id]))
         activ = Enumeration.activities.select{|a|a.id == time_entries[id][:activity_id].to_i}
         time_entry.comments = time_entries[id][:comments].empty? ? (activ.empty? ? "Logged spent time." : "Logged spent time. Doing #{activ.first.name} on #{issue.subject}.") : time_entries[id][:comments]
-
-        unless time_entry.hours.nil?
-          total_hours += time_entry.hours
-        end
-        total_entries = User.find(time_entry.user_id).time_entries.find(:all, :conditions => "spent_on = '#{time_entry.spent_on}'")
-        total_entries.each do |v|
-          total_hours += v.hours
-        end
-
-        issue_is_billable = true if Issue.find(issue.id).acctg_type == Enumeration.find_by_name('Billable').id
-        if project.project_type.scan(/^(Admin)/).flatten.present?
-          if membership = project.members.detect {|m| m.user_id == time_entry.user_id}
-            user_is_member = true
-            accept_time_log = true
+        if time_entry.save
+          total_time_entry = TimeEntry.sum(:hours, :conditions => "issue_id = #{time_entry.issue.id}")
+          if !time_entry.issue.estimated_hours.nil?
+            remaining_estimate = time_entry.issue.estimated_hours - total_time_entry
+            journal.details << JournalDetail.new(:property => 'timelog', :prop_key => 'remaining_estimate', :value => remaining_estimate >= 0 ? remaining_estimate : 0)
           end
+          journal.save
+          saved_time_entries << time_entry
         else
-          if membership = project.members.project_team.detect {|m| m.user_id == time_entry.user_id}
-            user_is_member = true
-            billable_member = membership.billable?(time_entry.spent_on, time_entry.spent_on)
-            accept_time_log = true if ((issue_is_billable && billable_member) || !issue_is_billable)
-          end
-        end
-
-        if total_hours <= 24 && accept_time_log
-          if time_entry.save
-            total_time_entry = TimeEntry.sum(:hours, :conditions => "issue_id = #{time_entry.issue.id}")
-            if !time_entry.issue.estimated_hours.nil?
-              remaining_estimate = time_entry.issue.estimated_hours - total_time_entry
-              journal.details << JournalDetail.new(:property => 'timelog', :prop_key => 'remaining_estimate', :value => remaining_estimate >= 0 ? remaining_estimate : 0)
-            end
-            journal.save
-            saved_time_entries << time_entry
-          else
-            unsaved_time_entries << time_entry
-          end
-        else
-          time_entry.errors.add_to_base "Cannot log more than 24 hours per day" unless total_hours <= 24
-          time_entry.errors.add_to_base "You are not allowed to log time to this task." unless accept_time_log
           unsaved_time_entries << time_entry
         end
       end
