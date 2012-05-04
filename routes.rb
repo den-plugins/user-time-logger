@@ -5,6 +5,7 @@ map.with_options :controller => 'custom_timelog' do |timelog|
       time_edit.connect 'issues/:issue_id/time_entries/new'
     end
 
+    timelog.connect 'projects/:project_id/time_entries', :action => 'details'
     timelog.connect 'projects/:project_id/time_entries/report', :action => 'report'
 end
 
