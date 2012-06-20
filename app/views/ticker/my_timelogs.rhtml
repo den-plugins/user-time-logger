@@ -8,8 +8,7 @@
 <%= l(:label_export_to) %>
 <span><%= link_to 'Atom', {:issue_id => @issue, :format => 'atom', :key => User.current.rss_key}, :class => 'feed' %></span>
 </p>
-
-<% html_title l('My Time Logs') %>
+<% html_title 'New Den Development' %>
 
 <% content_for :header_tags do %>
     <%= auto_discovery_link_tag(:atom, {:issue_id => @issue, :format => 'atom', :key => User.current.rss_key}, :title => l('My Time Logs')) %>
