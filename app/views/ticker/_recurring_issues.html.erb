@@ -10,8 +10,8 @@
 # ---------------------------------------------------------------------------
 %>
 <%if @issues and @issues.any?%>
-  <h2><%=l('Recurring Issues')%></h2>
-  <% html_title(l('Recurring Issues')) %>
+  <h2>Recurring Issues</h2>
+  <% html_title('Recurring Issues') %>
   <table class="list issues">
     <thead><tr>
         <th><%= link_to image_tag('toggle_check.png'), {}, :onclick => 'toggleIssuesSelection(Element.up(this, "form")); return false;',
