@@ -1,3 +1,7 @@
+<% content_for :header_tags do %>
+	<%= javascript_include_tag "jquery.js", :plugin => 'pm_dashboard' %>
+	<%= javascript_include_tag "pm_dashboard.js", :plugin => "pm_dashboard" %>
+<% end %>
 <h2><%= l(:label_spent_time) %></h2>
 
 <% if @time_entry.id
@@ -8,10 +12,10 @@
 <% labelled_tabular_form_for :time_entry, @time_entry, :url => url do |f| %>
 <%= error_messages_for 'time_entry' %>
 <%= back_url_hidden_field_tag %>
-
 <div class="box">
 <p><%= f.text_field :issue_id, :size => 6 %> <em><%= h("#{@time_entry.issue.tracker.name} ##{@time_entry.issue.id}: #{@time_entry.issue.subject}") if @time_entry.issue %></em></p>
-<p><%= f.text_field :spent_on, :size => 10, :required => true %><%= calendar_for('time_entry_spent_on') %></p>
+<p><%= f.text_field :spent_on, :size => 10, :required => true %><%= date_calendar_for('time_entry_spent_on',@project) %></p>
+<%= hidden_field_tag :lock_field, @project.lock_time_logging %>
 <p><%= f.text_field :hours, :size => 6, :required => true %></p>
 <p><strong>* Hours and minutes:</strong> 1h, 1 h, 1 hour, 2 hours, 30m, 30min, 1h30, 1h30m, 1:30<br />
    <strong>* Hours as decimal:</strong> 1.5, 1,5 (equals to 1h30m)</p>
@@ -27,3 +31,4 @@
 <%= submit_tag l(:button_save) %>
 
 <% end %>
+

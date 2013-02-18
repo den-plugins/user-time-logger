@@ -1,3 +1,7 @@
+<% content_for :header_tags do %>
+    <%= javascript_include_tag "jquery.js", :plugin => 'pm_dashboard' %>
+    <%= javascript_include_tag "pm_dashboard.js", :plugin => "pm_dashboard" %>
+<% end %>
 <%
 # ---------------------------------------------------------------------------
 #  Copyright 2007,2008 CompanyNameHere
@@ -54,7 +58,8 @@
                              <td><label for="time_entries_<%=issue.id%>_hours">Hours<span class="required">*</span></label>
                              <input type="text" size="8" name="time_entries[<%=issue.id%>][hours]" id="time_entries_<%=issue.id%>_hours"/></td>
                              <td><label for="time_entries_<%=issue.id%>_spent_on">Spent on</label>
-                                <%= text_field_tag "time_entries_#{issue.id}_spent_on", Date.today, :name=>"time_entries[#{issue.id}][spent_on]", :size => 10%><%= calendar_for("time_entries_#{issue.id}_spent_on") %>
+                                <%= text_field_tag "time_entries_#{issue.id}_spent_on", Date.today, :name=>"time_entries[#{issue.id}][spent_on]", :size => 10%><%= date_calendar_for("time_entries_#{issue.id}_spent_on",issue) %>
+                                <%= hidden_field_tag "lock_field_#{issue.id}", issue.project.lock_time_logging %>
                              </td>
                              <td><label for="time_entries_<%=issue.id%>_activity_id">Activity<span class="required">*</span></label>
                              <%= select_tag "time_entries_#{issue.id}_activity_id", options_for_select(activity_collection_for_select_options, Enumeration.activities.default), :name => "time_entries[#{issue.id}][activity_id]" %>
