@@ -58,7 +58,7 @@
                              <td><label for="time_entries_<%=issue.id%>_hours">Hours<span class="required">*</span></label>
                              <input type="text" size="8" name="time_entries[<%=issue.id%>][hours]" id="time_entries_<%=issue.id%>_hours"/></td>
                              <td><label for="time_entries_<%=issue.id%>_spent_on">Spent on</label>
-                                <%= text_field_tag "time_entries_#{issue.id}_spent_on", Date.today, :name=>"time_entries[#{issue.id}][spent_on]", :size => 6, :readonly => true %><%= date_calendar_for("time_entries_#{issue.id}_spent_on",issue) %>
+                                <%= text_field_tag "time_entries_#{issue.id}_spent_on", Date.today, :name=>"time_entries[#{issue.id}][spent_on]", :size => 8, :readonly => true %><%= date_calendar_for("time_entries_#{issue.id}_spent_on",issue) %>
                                 <%= hidden_field_tag "lock_field_#{issue.id}", issue.project.lock_time_logging %>
                              </td>
                              <td><label for="time_entries_<%=issue.id%>_activity_id">Activity<span class="required">*</span></label>
