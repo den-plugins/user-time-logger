@@ -67,10 +67,23 @@ class TickerController < ApplicationController
   # TODO: 1.merge this for the create action
   #       2.we have to tidy up the create action
   def log_time_from_assigned_issues
-    saved_time_entries,unsaved_time_entries = TimeEntry.save_time_entries(User.current, params[:ids]||=[], params[:time_entries])    
-    if unsaved_time_entries.length > 0
-      flash[:error] = display_time_entries_errors_nicely(unsaved_time_entries)
+    errors = []
+    if params[:ids]
+      params[:ids].each do |k,v|
+        project = Issue.find(k).project
+        if project.lock_time_logging && params[:time_entries][k][:spent_on].to_date <= project.lock_time_logging
+          errors << "Time Logging is Prohibited for #{project.name} until #{project.lock_time_logging}"
+        end
+      end
     end
+
+    if errors.blank?
+      saved_time_entries,unsaved_time_entries = TimeEntry.save_time_entries(User.current, params[:ids]||=[], params[:time_entries]) 
+      if unsaved_time_entries.length > 0
+        errors << display_time_entries_errors_nicely(unsaved_time_entries)
+      end
+    end
+    flash[:error] = errors.uniq unless errors.blank?
     redirect_to(:controller => 'my', :action => 'page')
   end
   
