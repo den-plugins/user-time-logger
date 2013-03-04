@@ -31,7 +31,7 @@ entries_by_day = entries.group_by(&:spent_on)
   <td class="comments"><center><%= textilizable entry.comments %></center></td>
   <td class="hours"><center><%= html_hours("%.2f" % entry.hours) %></center></td>
   <td class="col1-0 alignC">
-  <% if entry.editable_by?(@user) && entry.time_log_locked? -%>
+  <% if entry.editable_by?(@user) && entry.time_log_locked?(entry.spent_on) -%>
       <%= link_to image_tag('edit.png'), {:controller => 'custom_timelog', :action => 'edit', :id => entry},
                                          :title => l(:button_edit) %>
       <%= link_to image_tag('delete.png'), {:controller => 'timelog', :action => 'destroy', :id => entry},
