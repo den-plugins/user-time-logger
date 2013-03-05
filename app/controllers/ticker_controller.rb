@@ -72,8 +72,11 @@ class TickerController < ApplicationController
       params[:ids].each do |k,v|
         project = Issue.find(k).project
         if project.lock_time_logging && params[:time_entries][k][:spent_on].to_date <= project.lock_time_logging
-          errors << "Time Logging is Prohibited for #{project.name} until #{project.lock_time_logging}"
+          errors << "* #{project.name} until #{project.lock_time_logging}<br>"
         end
+      end
+      unless errors.blank?
+        errors.insert(0, "Time Logging is Prohibited for the ff :<br>")
       end
     end
 
