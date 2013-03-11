@@ -482,6 +482,7 @@ class TickerController < ApplicationController
     @tall ||= []
     @projects.each do |prj|
       x = Hash.new
+      x[:project_id] = prj.id
       x[:name] = prj.name
       x[:job_title] = @user.memberships.select{|e| e.project_id == prj.id }[0].role.name
       
