@@ -480,8 +480,12 @@ class TickerController < ApplicationController
                                   :joins => [:issue] )
     @summary = []
     @tall ||= []
+
+    current_proj = Project.find params[:project_id]
     @projects.each do |prj|
+
       x = Hash.new
+      x[:admin] = prj.is_admin_project? && current_proj.parent.children.include?(prj) ? true : false
       x[:project_id] = prj.id
       x[:name] = prj.name
       x[:job_title] = @user.memberships.select{|e| e.project_id == prj.id }[0].role.name
