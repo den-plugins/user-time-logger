@@ -22,7 +22,7 @@
               <tr class="time-entry" style="border-bottom: 1px solid rgb(245, 245, 245);">
                 <td class="subject"> <%= summary[:name] %> </td>
                 <td> <%= summary[:job_title] %> </td>
-                <td class="<%#= params[:total_hours_on_selected] > params[:max_hours] && params[:project_id].to_i.eql?(summary[:project_id]) ? 'redBorder' : '' %>">
+                <td class="<%= params[:proj_logged_hours] > params[:max_hours] && params[:project_id].to_i.eql?(summary[:project_id]) ? 'redBorder' : '' %>">
                   <%= html_hours("%.2f" % summary[:total_hours].to_f)  %> 
                 </td>
                 <td> <%= html_hours("%.2f" % summary[:billable_hours].to_f) %>  </td>
