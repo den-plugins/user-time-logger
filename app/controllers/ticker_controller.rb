@@ -485,7 +485,7 @@ class TickerController < ApplicationController
     @projects.each do |prj|
 
       x = Hash.new
-      x[:admin] = prj.is_admin_project? && current_proj.parent.children.include?(prj) ? true : false
+      x[:admin] = (prj.is_admin_project? && current_proj.parent.children.include?(prj)) || prj.is_exst_engg_admin? ? true : false
       x[:project_id] = prj.id
       x[:name] = prj.name
       x[:job_title] = @user.memberships.select{|e| e.project_id == prj.id }[0].role.name
