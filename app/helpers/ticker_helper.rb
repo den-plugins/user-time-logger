@@ -648,5 +648,10 @@ def leave_entries_to_csv(leaves, projects, option)
     export
   end  
   
+  def highlight_allocated_class(thos,mh,proj_id,summary)
+    # thos = total_hours_on_selected
+    # mh = max_hours
+    thos.to_i > mh.to_i && (proj_id.to_i.eql?(summary[:project_id]) || summary[:admin]) ? 'redFont' : ''
+  end
 
 end
