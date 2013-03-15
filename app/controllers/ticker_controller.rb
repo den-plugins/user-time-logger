@@ -481,11 +481,11 @@ class TickerController < ApplicationController
     @summary = []
     @tall ||= []
 
-    current_proj = Project.find params[:project_id]
+    current_proj = Project.find params[:project_id] rescue nil
     @projects.each do |prj|
-      highligh_exst_engg_admin = prj.is_exst_engg_admin? && current_proj.accounting_type.downcase == "non-billable" ? true : false
+      highligh_exst_engg_admin = prj.is_exst_engg_admin? && current_proj.accounting_type.downcase == "non-billable" ? true : false if current_proj
       x = Hash.new
-      x[:admin] = (prj.is_admin_project? && current_proj.parent.children.include?(prj)) || highligh_exst_engg_admin ? true : false
+      x[:admin] = (prj.is_admin_project? && current_proj.parent.children.include?(prj)) || highligh_exst_engg_admin ? true : false if current_proj
       x[:project_id] = prj.id
       x[:name] = prj.name
       x[:job_title] = @user.memberships.select{|e| e.project_id == prj.id }[0].role.name
